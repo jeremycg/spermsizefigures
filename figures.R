@@ -116,6 +116,7 @@ clumper<-function(species){
 	holding=rbind(holding,spermsize2.1[spermsize2.1$Species==species,])
 	holding=rbind(holding,spermsize1.1[spermsize1.1$Species==species,])
 	holding$plotter<-factor(holding$plotter,levels=c("intra individual","between individuals","between strains"))
+  holding$plotcolour<-as.numeric(factor(holding$Strain))
 	return(holding)
 }
 
@@ -127,7 +128,7 @@ plotter<-function(strainlist){
 				}
 			}
 		p<-ggplot(x,aes(factor(plotter),cv))
-		p+geom_jitter(aes(colour = factor(Strain),size = 5),position = position_jitter(width = .2))+facet_wrap(~Species,ncol = length(strainlist),scales = "free_x")+
+		p+geom_jitter(aes(colour = factor(plotcolour),size = 5),position = position_jitter(width = .2))+facet_wrap(~Species,ncol = length(strainlist),scales = "free_x")+
     theme(panel.margin = unit(0.05, "lines"),legend.position = "none")+xlab("")+
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
        panel.background = element_blank(),axis.line = element_line(colour = "black"))
