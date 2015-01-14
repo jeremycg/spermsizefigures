@@ -1,27 +1,56 @@
-#load stuff
+---
+title: "Sperm size figures"
+author: "jeremy"
+date: "Wednesday, January 14, 2015"
+output: html_document
+---
 
+Sperm size figures
+========================================================
+
+This is the output of an R markdown script - a fancy way of embedding r in a page so we can rerun/tune it as needed and then have the commands
+
+First we gotta load libraries:
+
+```{r}
 library(phytools)
 library(ape)
 library(geiger)
 library(dplyr)
 library(ggplot2)
 library(Hmisc)
+```
 
-#inputs tree from Kiontke et al 2011, figure 3
-#values are from that tree, a couple flips
-#values are corrected
-#intial values had angaria and sp12 flipped - I've correct it here
+Here's the tree from Kiontke et al 2011, figure 3
+intial values I recieved had angaria and sp12 flipped - I've corrected it here
+
+```{r}
 tr<-read.tree(text="(C. sp. 1:0.356,(C. plicata:0.3,((C. guadeloupensis:0.223,((C. portoensis:0.158,C. virilis:0.201):0.005,((C. sp. 8:0.169,(C. angaria:0.031,C. castelli:0.037):0.131):0.073,(C. drosophilae:0.027,C. sp. 2:0.03):0.161):0.047):0.033):0.074,((C. kamaaina:0.14,(C. japonica:0.16,((C. imperialis:0.082,C. afra:0.182):0.009,((C. yunquensis:0.086,C. nouraguensis:0.085):0.038,C. macrosperma:0.159):0.057):0.012):0.059):0.041,(C. elegans:0.166,(((C. brenneri:0.129,C. doughertyi:0.111):0.042,(C. wallacei:0.083,C. tropicalis:0.07):0.033):0.013,(C. remanei:0.129,(C. sp. 5:0.127,(C. briggsae:0.047,C. nigoni:0.032):0.088):0.02):0.017):0.046):0.02):0.195):0.07):0.259);")
-#labels tree nicely with new names and spaces
-tr$tip.label<-c("C. sp. 1","C. plicata","C. guadeloupensis","C. portoensis","C. virilis","C. sp. 8","C. angaria","C. castelli",
-                "C. drosophilae","C. sp. 2","C. kamaaina","C. japonica","C. imperialis","C. afra","C. yunquensis","C. nouraguensis","C. macrosperma",
-                "C. elegans","C. brenneri","C. doughertyi","C. wallacei","C. tropicalis","C. remanei","C. sp. 5","C. briggsae","C. nigoni")
-#plots to check
+```
+
+The input read is a little ghetto - let's rename everthing now it's in
+
+```{r}
+tr$tip.label<-c("C. sp. 1","C. plicata","C. guadeloupensis","C. portoensis","C. virilis","C. sp. 8","C. angaria","C. castelli","C. drosophilae","C. sp. 2","C. kamaaina","C. japonica","C. imperialis","C. afra","C. yunquensis","C. nouraguensis","C. macrosperma","C. elegans","C. brenneri","C. doughertyi","C. wallacei","C. tropicalis","C. remanei","C. sp. 5","C. briggsae","C. nigoni")
+```
+
+And plot out the normal tree
+
+```{r}
 plot(tr)
-#read in data
+```
+
+Let's read in the compiled data
+
+```{r}
 setwd("C:/Users/jeremy/Desktop/geiger")
+#change to your working directory!!!!
 f<-read.table("compileddata.csv",header=T,sep=",")
-#correct for species names
+```
+
+The given species names were a little off - let's fix them
+
+```{r}
 weneednewnames <- list("brenneri"="C. brenneri",
                        "C. angaria"="C. angaria",
                        "C. briggsae"="C. briggsae",
@@ -50,23 +79,20 @@ weneednewnames <- list("brenneri"="C. brenneri",
                        "C. sp. 9"="C. nigoni")
 f$Species<-weneednewnames[f$Species]
 f$Species<-as.factor(unlist(f$Species))
-
 spermsize1<-f %>% group_by(Species) %>% summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
-
-
 rownames(spermsize1) <- spermsize1$Species
+```
 
+ok and now the figures - figure 1D
+but this is trash - we aren't taking phylogenetic independent contrasts
+It's redone below, but kept in for posterity
 
-#ok and now the figures
-#figure 1D
-#this is trash - we aren;t taking phylogenetic independent contrasts
-#redone below
+```{r}
 spermsize1<-f %>% group_by(Species) %>% summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
 spermsize2<-f %>% group_by(Species,Strain) %>% summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
 spermsize3<-f %>% group_by(Species,Strain,individual) %>% summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
-
 plotcv<-function(spermin){
-	plot(spermin$cv~spermin$means,xlab=expression("Mean Sperm Size "~(mu~m^{3})),pch=19,ylab="CV")
+  plot(spermin$cv~spermin$means,xlab=expression("Mean Sperm Size "~(mu~m^{3})),pch=19,ylab="CV")
 	fit1=lm(spermin$cv~spermin$mean)
 	abline(fit1$coefficients,lwd=2,col=8)
 	r2=summary(fit1)$adj.r.squared
@@ -76,12 +102,14 @@ plotcv<-function(spermin){
 	rp[2]=substitute(expression(italic(p) == MYVALUE), list(MYVALUE = format(p,dig=3)))[2]
 	legend("bottomright",bty="n",legend=rp)
 }
-
 plotcv(spermsize1)
 plotcv(spermsize2)
 plotcv(spermsize3)
+```
 
-#figure1D with PIC
+And now with PIC, figure 1D
+
+```{r}
 rownames(spermsize1) <- spermsize1$Species
 spermsize1 <- spermsize1[match(tr$tip.label,rownames(spermsize1)),]
 x1 <- pic(spermsize1$means, tr)
@@ -94,16 +122,22 @@ p=anova(fit1)$P[1]
 rp = vector('expression',1)
 rp[2]=substitute(expression(italic(p) == MYVALUE), list(MYVALUE = format(p,dig=3)))[2]
 legend("bottomright",bty="n",legend=rp)
+```
 
-#figure 3A with violin plots
+figure 3A with violin plots
+
+```{r}
 g=f[f$Species=="C. brenneri"|f$Species=="C. remanei"|f$Species=="C. sp. 8"|f$Species=="C. macrosperma",]
 p<-ggplot(g,aes(factor(Strain), area))
 p + facet_wrap(~Species,ncol = 3,scales = "free_x")+geom_violin(aes(fill = Species)) + geom_jitter(position = position_jitter(width = .2),alpha=0.5,)+
 	theme(legend.position = "none") +ylab( expression(paste("area (", mu, m^{2},")")))+xlab("Strain")+theme(panel.margin = unit(0.05, "lines"))+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
     panel.background = element_blank(), axis.line = element_line(colour = "black"))
+```
 
-#figure 3B
+figure 3B
+
+```{r}
 spermsize2.1<-spermsize3 %>% summarise(cv=sd(means)/mean(means),means=mean(means),plotter="between individuals")
 spermsize2.1$individual="dropped"
 spermsize1.1<-spermsize2.1 %>% summarise(cv=sd(means)/mean(means),means=mean(means),plotter="between strains")
@@ -134,18 +168,27 @@ plotter<-function(strainlist){
        panel.background = element_blank(),axis.line = element_line(colour = "black"))
 	}
 plotter(c("C. brenneri","C. remanei","C. sp. 8","C. macrosperma"))
+```
 
-#figure mockup a
+figure mockup a
+we are starting agin here, as I've modified some of the variables etc above
+Easier to start with a clean slate
+Clean and read in data:
+
+```{r}
 library(phytools)
 library(ape)
 library(geiger)
 library(dplyr)
 library(ggplot2)
-#read in data
 setwd("C:/Users/jeremy/Desktop/geiger")
 ff<-read.table("malevhermcomp.csv",header=T,sep=",")
 ff[ff$Species=="C. sp.11",]$Species="C. sp. 11"
-#mean and sd
+```
+
+mean and sd
+
+```{r}
 groupedmeans=ff %>% group_by(Species,sex) %>% summarise(mean=mean(area,na.rm=T),n=n(),sd=sd(area,na.rm=T))
 limits <- aes(ymax = mean + 1.96*sd/sqrt(n), ymin=mean - 1.96*sd/sqrt(n))
 dodge <- position_dodge(width=0.9)
@@ -153,11 +196,13 @@ ggplot(data=groupedmeans, aes(x=Species, y=mean, fill=sex)) + geom_bar(stat="ide
 	scale_fill_manual(values=c("gray","white"))+ylab( expression(paste("area (", mu, m^{2},")")))+xlab("Species")+coord_cartesian(ylim=c(0,25))+
 	theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
      panel.background = element_blank(),axis.line = element_line(colour = "black"),legend.position = "none")
+```
 
+Figure mockup b
+group to get the data I want
+it's ugly, but it works
 
-#Figure mockup b
-#group to get the data I want
-#it's ugly, but it works
+```{r}
 groupedstrains=ff %>% group_by(Species,Strain) %>%
     do(data.frame(meanM=mean(.[which(.$sex=="M"),]$area,na.rm=T),meanH=mean(.[which(.$sex=="H"),]$area,na.rm=T),nM=sum(.$sex=="M"),nH=sum(.$sex=="H"),
                   sdM=sd(.[which(.$sex=="M"),]$area,na.rm=T),sdH=sd(.[which(.$sex=="H"),]$area,na.rm=T)))
@@ -168,12 +213,13 @@ p+geom_point(size=5)+coord_cartesian(ylim=c(0,15),xlim=c(0,33))+theme(panel.grid
      panel.background = element_blank(),axis.line = element_line(colour = "black"),legend.position = "none")+ geom_errorbar(width=0.5)+geom_errorbarh(height=0.5)+
 	 ylab(expression(paste("Hermaphrodite Sperm area (", mu, m^{2},")")))+xlab(expression(paste("Male Sperm area (", mu, m^{2},")")))+
 	 geom_smooth(aes(group=Species), method="lm",size=1.5,colour="black")
+```
 
-#figure1a - bars
-#need to rerun the above
+figure1a - bars
+need to rerun the above
 
+```{r}
 spermsize2<-f %>% group_by(Species,Strain) %>% summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T),sem=mean(area,na.rm=T)/sqrt(n()))
-
 countspec=function(dataframe){
 	holding=c()
 	for(i in 1:nrow(dataframe)){
@@ -181,13 +227,11 @@ countspec=function(dataframe){
 	}
 	return(holding)
 }
-
 spermsize2$Species<-ordered(spermsize2$Species,levels=c(tr$tip.label))
 spermsize2<-spermsize2[order(spermsize2$Species),]
 spermsize2$Strain<-factor(spermsize2$Strain, levels = spermsize2$Strain)
 spermsize2$specnum=countspec(spermsize2)
 spermsize2$cols=cut(spermsize2$means,3)
-
 findchange<-function(df){
     holding=c()
     for(i in 1:length(df$Species)){
@@ -225,25 +269,40 @@ ggplot(data=spermsize2,aes(x = pos, width = w, y = means, fill=cols,ymin=means-s
     geom_bar(stat = "identity",colour="black") + scale_x_continuous(labels = spermsize2$Strain, breaks = pos)+geom_linerange()+
 	theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
      panel.background = element_blank(),axis.line = element_line(colour = "black"),legend.position = "none")
+```
 
+large tree
+first group all the data
 
-#large tree
+```{r}
 spermsize1<-f %>% group_by(Species) %>% summarise(means=mean(area,na.rm=T))
 spermsize2<-f %>% group_by(Species,Strain) %>% summarise(means=mean(area,na.rm=T))
 spermsize3<-f %>% group_by(Species,Strain,individual) %>% summarise(means=mean(area,na.rm=T))
-#function to fix the format of spermsizes, and fit tree
+```
+
+function to fix the format of spermsizes, and fit tree
+
+```{r}
 fitace <- function(spermsizes,tree){
   holding<-spermsizes$means
   names(holding)<-spermsizes$Species
   return(fastAnc(tree,holding,CI=T))
 }
-#function to choose a subset - works on any level, just chooses one from each species
+```
+
+function to choose a subset - works on any level, just chooses one from each species
+
+```{r}
 subsetter<-function(spermsizes){
   x=lapply(split(spermsizes, spermsizes$Species),function(subdf) subdf[sample(1:nrow(subdf), 1),])
   do.call("rbind",x)
 }
-#example usage fitace(subsetter(spermsizes2),tr)
-#now need to loop and keep the values
+```
+
+example usage fitace(subsetter(spermsizes2),tr)
+now need to loop and keep the values
+
+```{r}
 looper<-function(spermsizes,reps,tree){
   outputdata=data.frame()
   outputCI=data.frame()
@@ -254,18 +313,20 @@ looper<-function(spermsizes,reps,tree){
   names(outputdata)=seq(from=27,to=51)
   return(c(outputdata,outputCI))
 }
-#ok we can call eg x=looper(spermsize3,10,tr)
-#then mean and sd, etc. etc.
+```
+
+ok we can call eg x=looper(spermsize3,10,tr)
+then mean and sd, etc. etc.
+
+```{r}
 x<-fitace(spermsize1,tr)
 AncSperm=x$ace
 #or AncSperm=apply(x,2,mean) if it's bootstrapped
-spermsize1$Species <- factor(spermsize1$Species, levels = c("C. sp. 1","C. plicata","C. guadeloupensis","C. portoensis","C. virilis","C. sp. 8","C. angaria","C. castelli",
-                "C. drosophilae","C. sp. 2","C. kamaaina","C. japonica","C. imperialis","C. afra","C. yunquensis","C. nouraguensis","C. macrosperma",
-                "C. elegans","C. brenneri","C. doughertyi","C. wallacei","C. tropicalis","C. remanei","C. sp. 5","C. briggsae","C. nigoni"))
+spermsize1$Species <- factor(spermsize1$Species, levels = c("C. sp. 1","C. plicata","C. guadeloupensis","C. portoensis","C. virilis","C. sp. 8","C. angaria","C. castelli","C. drosophilae","C. sp. 2","C. kamaaina","C. japonica","C. imperialis","C. afra","C. yunquensis","C. nouraguensis","C. macrosperma","C. elegans","C. brenneri","C. doughertyi","C. wallacei","C. tropicalis","C. remanei","C. sp. 5","C. briggsae","C. nigoni"))
 spermsize=spermsize1[order(spermsize1$Species),]$means
 names(spermsize)<-spermsize1[order(spermsize1$Species),]$Species
 plot(tr,label.offset=0,no.margin = TRUE,show.tip.label = F,x.lim=c(0,1),edge.width=1.5,edge.color=c(1))
-#loads the graph into memory, then plots the anc. states ib the nodes
+#loads the graph into memory, then plots the anc. states on the nodes
 #this is taken more or less from Nicos function
 lastPP <- get("last_plot.phylo", envir = .PlotPhyloEnv)
   node <- (lastPP$Ntip + 1):length(lastPP$xx)
@@ -290,6 +351,5 @@ YY <- lastPP$yy[tip]
 
 points(XX,YY,col="blue",lwd=(round(spermsize,digit=1)/max(round(spermsize,digit=1))*50),pch=19)
 text(XX+0.15,YY,labels=round(spermsize,digit=1),col="blue",cex=1.4)
-text(XX+0.07,YY,labels=c("C. sp. 1","C. plicata","C. guadeloupensis","C. portoensis","C. virilis","C. sp. 8","C. angaria","C. castelli",
-                "C. drosophilae","C. sp. 2","C. kamaaina","C. japonica","C. imperialis","C. afra","C. yunquensis","C. nouraguensis","C. macrosperma",
-                "C. elegans","C. brenneri","C. doughertyi","C. wallacei","C. tropicalis","C. remanei","C. sp. 5","C. briggsae","C. nigoni"),col="black",cex=1.2,font=3)
+text(XX+0.07,YY,labels=c("C. sp. 1","C. plicata","C. guadeloupensis","C. portoensis","C. virilis","C. sp. 8","C. angaria","C. castelli","C. drosophilae","C. sp. 2","C. kamaaina","C. japonica","C. imperialis","C. afra","C. yunquensis","C. nouraguensis","C. macrosperma", "C. elegans","C. brenneri","C. doughertyi","C. wallacei","C. tropicalis","C. remanei","C. sp. 5","C. briggsae","C. nigoni"),col="black",cex=1.2,font=3)
+```
