@@ -40,14 +40,15 @@ And plot out the normal tree
 plot(tr)
 ```
 
-Let's read in the compiled data
+Let's read in the compiled data, and apply a quick filter:
+instructions say:"the most relevant measure would be the stage -1 and I would ignore the others."
 
 ```{r}
 setwd("C:/Users/jeremy/Desktop/geiger")
-#change to your working directory!!!!
-f<-read.table("compileddata.csv",header=T,sep=",")
+spermsizes<-read.table("compileddata.csv",header=T,sep=",")
 oocytesize<-read.table("oocyteSizeCaeno.csv",header=T,sep=",")
 primaryspermatocyte<-read.table("PrimarySpermatocyteSize.csv",header=T,sep=",")
+oocytesize<-oocytesize[oocytesize$oocyte.stage!=-1,]
 ```
 
 The given species names were a little off - let's fix them. The oocyte ones and spermatocyte ones are too, as well as inconsistent across the files. 
@@ -99,48 +100,38 @@ weneednewnames <- list("brenneri"="C. brenneri",
                        "C. sp. 7"="C. afra",
                        "C. sp9"="C. nigoni",
                        "C. sp. 9"="C. nigoni")
-f$Species<-weneednewnames[f$Species]
-f$Species<-as.factor(unlist(f$Species))
 
-oocytesize$Species<-weneednewnames[oocytesize$Species]
-oocytesize$Species<-as.factor(unlist(oocytesize$Species))
+renameworms<-function(df){
+  df$Species<-weneednewnames[df$Species]
+  df$Species<-as.factor(unlist(df$Species))
+  df
+}
 
-primaryspermatocyte$Species<-weneednewnames[primaryspermatocyte$Species]
-primaryspermatocyte$Species<-as.factor(unlist(primaryspermatocyte$Species))
-
-spermsize1<-f %>% group_by(Species) %>% summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
-rownames(spermsize1) <- spermsize1$Species
-
-oocytesize1<-oocytesize %>% group_by(Species) %>% summarise(means=mean(volume.um3,na.rm=T),cv=sd(volume.um3,na.rm=T)/mean(volume.um3,na.rm=T))
-rownames(oocytesize1) <- oocytesize1$Species
-
-primaryspermatocyte1<-primaryspermatocyte %>% group_by(Species) %>% summarise(means=mean(Primary.Spermatocyte.Size..area.um2.,na.rm=T),cv=sd(Primary.Spermatocyte.Size..area.um2.,na.rm=T)/mean(Primary.Spermatocyte.Size..area.um2.,na.rm=T))
-rownames(primaryspermatocyte1) <- primaryspermatocyte1$Species
-
+spermsizes<-renameworms(spermsizes)
+oocytesize<-renameworms(oocytesize)
+primaryspermatocyte<-renameworms(primaryspermatocyte)
 ```
 
-ok and now the figures - figure 1D
-but this is trash - we aren't taking phylogenetic independent contrasts
-It's redone below, but kept in for posterity
+names should now be uniform.
+
+Let's cluster stuff by mean and cv
 
 ```{r}
-spermsize1<-f %>% group_by(Species) %>% summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
-spermsize2<-f %>% group_by(Species,Strain) %>% summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
-spermsize3<-f %>% group_by(Species,Strain,individual) %>% summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
-plotcv<-function(spermin){
-  plot(spermin$cv~spermin$means,xlab=expression("Mean Sperm Size "~(mu~m^{3})),pch=19,ylab="CV")
-	fit1=lm(spermin$cv~spermin$mean)
-	abline(fit1$coefficients,lwd=2,col=8)
-	r2=summary(fit1)$adj.r.squared
-	p=anova(fit1)$P[1]
-	rp = vector('expression',2)
-	rp[1]=substitute(expression(italic(R)^2 == MYVALUE), list(MYVALUE = format(r2,dig=3)))[2]
-	rp[2]=substitute(expression(italic(p) == MYVALUE), list(MYVALUE = format(p,dig=3)))[2]
-	legend("bottomright",bty="n",legend=rp)
+clusterer<-function(df){
+  x<-df %>% group_by(Species) %>% 
+    summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
+  rownames(x) <- x$Species
+  x
 }
-plotcv(spermsize1)
-plotcv(spermsize2)
-plotcv(spermsize3)
+
+spermsize1<-clusterer(spermsizes)
+
+names(oocytesize)<-c("Species","Strain","Ind","oocyte.stage","length.um","width.um","area")
+oocytesize1<-clusterer(oocytesize)
+
+names(primaryspermatocyte)<-c("Species","Strain","Sex","individual","area")
+primaryspermatocyte1<-clusterer(primaryspermatocyte)
+
 ```
 
 And now with PIC, figure 1D
