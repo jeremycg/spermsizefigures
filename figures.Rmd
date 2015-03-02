@@ -136,54 +136,27 @@ primaryspermatocyte1<-clusterer(primaryspermatocyte)
 
 And now with PIC, figure 1D
 
-```{r}
-rownames(spermsize1) <- spermsize1$Species
-spermsize1 <- spermsize1[match(tr$tip.label,rownames(spermsize1)),]
-x1 <- pic(spermsize1$means, tr)
-y1 <- pic(spermsize1$cv, tr)
-#cor.test(x1,y1)
-plot(y1~x1,xlab="PIC of Sperm Size",ylab="PIC of CV",pch=19)
-fit1=lm(y1~x1)
-abline(fit1$coefficients,lwd=2,col=8)
-p=anova(fit1)$P[1]
-rp = vector('expression',1)
-rp[2]=substitute(expression(italic(p) == MYVALUE), list(MYVALUE = format(p,dig=3)))[2]
-legend("bottomright",bty="n",legend=rp)
-```
-
-oocyte size
 
 ```{r}
-tr1<-drop.tip(tr,tr$tip.label[!(tr$tip.label %in% oocytesize1$Species)])
-oocytesize1 <- oocytesize1[match(tr1$tip.label,rownames(oocytesize1)),]
-x1 <- pic(oocytesize1$means, tr1)
-y1 <- pic(oocytesize1$cv, tr1)
-#cor.test(x1,y1)
-plot(y1~x1,xlab="PIC of Sperm Size",ylab="PIC of CV",pch=19)
-fit1=lm(y1~x1)
-abline(fit1$coefficients,lwd=2,col=8)
-p=anova(fit1)$P[1]
-rp = vector('expression',1)
-rp[2]=substitute(expression(italic(p) == MYVALUE), list(MYVALUE = format(p,dig=3)))[2]
-legend("bottomright",bty="n",legend=rp)
+plotpic<-function(df,tree){
+  tree<-drop.tip(tree,tree$tip.label[!(tree$tip.label %in% df$Species)])
+  df <- df[match(tree$tip.label,rownames(df)),]
+  x1 <- pic(df$means, tree)
+  y1 <- pic(df$cv, tree)
+  plot(y1~x1,xlab="PIC of Sperm Size",ylab="PIC of CV",pch=19)
+  fit1=lm(y1~x1)
+  abline(fit1$coefficients,lwd=2,col=8)
+  p=anova(fit1)$P[1]
+  rp = vector('expression',1)
+  rp[2]=substitute(expression(italic(p) == MYVALUE), list(MYVALUE = format(p,dig=3)))[2]
+  legend("bottomright",bty="n",legend=rp)
+}
+
+plotpic(spermsize1,tr)
+plotpic(oocytesize1,tr)
+plotpic(primaryspermatocyte1,tr)
 ```
 
-primaryspermatocyte
-
-```{r}
-tr1<-drop.tip(tr,tr$tip.label[!(tr$tip.label %in% primaryspermatocyte1$Species)])
-primaryspermatocyte1 <- primaryspermatocyte1[match(tr1$tip.label,rownames(primaryspermatocyte1)),]
-x1 <- pic(primaryspermatocyte1$means, tr1)
-y1 <- pic(primaryspermatocyte1$cv, tr1)
-#cor.test(x1,y1)
-plot(y1~x1,xlab="PIC of Sperm Size",ylab="PIC of CV",pch=19)
-fit1=lm(y1~x1)
-abline(fit1$coefficients,lwd=2,col=8)
-p=anova(fit1)$P[1]
-rp = vector('expression',1)
-rp[2]=substitute(expression(italic(p) == MYVALUE), list(MYVALUE = format(p,dig=3)))[2]
-legend("bottomright",bty="n",legend=rp)
-```
 
 figure 3A with violin plots
 
