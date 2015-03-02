@@ -102,8 +102,9 @@ weneednewnames <- list("brenneri"="C. brenneri",
                        "C. sp. 9"="C. nigoni")
 
 renameworms<-function(df){
-  df$Species<-weneednewnames[df$Species]
-  df$Species<-as.factor(unlist(df$Species))
+  df$Species1<-as.character(df$Species)
+  df$Species1<-weneednewnames[df$Species1]
+  df$Species<-as.factor(unlist(df$Species1))
   df
 }
 
@@ -124,13 +125,31 @@ clusterer<-function(df){
   x
 }
 
-spermsize1<-clusterer(spermsizes)
+clusterer2<-function(df){
+  x<-df %>% group_by(Species,Strain) %>% 
+    summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
+  x
+}
 
-names(oocytesize)<-c("Species","Strain","Ind","oocyte.stage","length.um","width.um","area")
+clusterer3<-function(df){
+  x<-df %>% group_by(Species,Strain,individual) %>% 
+    summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
+  x
+}
+
+spermsize1<-clusterer(spermsizes)
+spermsize2<-clusterer2(spermsizes)
+spermsize3<-clusterer3(spermsizes)
+
+names(oocytesize)<-c("Species","Strain","individual","oocyte.stage","length.um","width.um","area")
 oocytesize1<-clusterer(oocytesize)
+oocytesize2<-clusterer2(oocytesize)
+oocytesize3<-clusterer3(oocytesize)
 
 names(primaryspermatocyte)<-c("Species","Strain","Sex","individual","area")
 primaryspermatocyte1<-clusterer(primaryspermatocyte)
+primaryspermatocyte2<-clusterer2(primaryspermatocyte)
+primaryspermatocyte3<-clusterer3(primaryspermatocyte)
 
 ```
 
@@ -159,6 +178,23 @@ plotpic(primaryspermatocyte1,tr)
 
 
 figure 3A with violin plots
+
+```{r}
+violinit<-function(f,specieslist){
+  g=f[f$Species%in%specieslist,]
+  p<-ggplot(g,aes(factor(Strain), area))
+  p + facet_wrap(~Species,ncol = 3,scales = "free_x")+geom_violin(aes(fill = Species)) + geom_jitter(position =
+    position_jitter(width = .2),alpha=0.5,)+theme(legend.position = "none") +
+    ylab( expression(paste("area (", mu, m^{2},")")))+xlab("Strain")+
+    theme(panel.margin = unit(0.05, "lines"))+theme(panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),panel.background = element_blank(), axis.line = element_line(colour = "black")
+  )
+}
+
+violinit(spermsizes,c("C. brenneri","C. remanei","C. sp. 8","C. macrosperma"))
+violinit(oocytesize,c("C. brenneri","C. remanei","C. sp. 8","C. macrosperma"))
+violinit(primaryspermatocyte,c("C. brenneri","C. remanei","C. sp. 8","C. macrosperma"))
+```
 
 ```{r}
 g=f[f$Species=="C. brenneri"|f$Species=="C. remanei"|f$Species=="C. sp. 8"|f$Species=="C. macrosperma",]
