@@ -48,7 +48,7 @@ setwd("C:/Users/jeremy/Desktop/geiger")
 spermsizes<-read.table("compileddata.csv",header=T,sep=",")
 oocytesize<-read.table("oocyteSizeCaeno.csv",header=T,sep=",")
 primaryspermatocyte<-read.table("PrimarySpermatocyteSize.csv",header=T,sep=",")
-oocytesize<-oocytesize[oocytesize$oocyte.stage!=-1,]
+oocytesize<-oocytesize[oocytesize$oocyte.stage==-1,]
 ```
 
 The given species names were a little off - let's fix them. The oocyte ones and spermatocyte ones are too, as well as inconsistent across the files. 
@@ -155,7 +155,6 @@ primaryspermatocyte3<-clusterer3(primaryspermatocyte)
 
 And now with PIC, figure 1D
 
-
 ```{r}
 plotpic<-function(df,tree){
   tree<-drop.tip(tree,tree$tip.label[!(tree$tip.label %in% df$Species)])
@@ -176,6 +175,28 @@ plotpic(oocytesize1,tr)
 plotpic(primaryspermatocyte1,tr)
 ```
 
+Let's try some PIC of spermsize vs oocyte size!
+
+```{r}
+plotpic2<-function(df1,df2,tree){
+  df<-merge(df1,df2,by="Species")
+  tree<-drop.tip(tree,tree$tip.label[!(tree$tip.label %in% df$Species)])
+  rownames(df)<-df$Species
+  df <- df[match(tree$tip.label,rownames(df)),]
+  x1 <- pic(df$means.x, tree)
+  y1 <- pic(df$means.y, tree)
+  plot(y1~x1,pch=19)
+  fit1=lm(y1~x1)
+  abline(fit1$coefficients,lwd=2,col=8)
+  p=anova(fit1)$P[1]
+  rp = vector('expression',1)
+  rp[2]=substitute(expression(italic(p) == MYVALUE), list(MYVALUE = format(p,dig=3)))[2]
+  legend("bottomright",bty="n",legend=rp)
+}
+plotpic2(spermsize1,oocytesize1,tr)
+plotpic2(spermsize1,primaryspermatocyte1,tr)
+plotpic2(primaryspermatocyte1,oocytesize1,tr)
+```
 
 figure 3A with violin plots
 
@@ -194,15 +215,6 @@ violinit<-function(f,specieslist){
 violinit(spermsizes,c("C. brenneri","C. remanei","C. sp. 8","C. macrosperma"))
 violinit(oocytesize,c("C. brenneri","C. remanei","C. sp. 8","C. macrosperma"))
 violinit(primaryspermatocyte,c("C. brenneri","C. remanei","C. sp. 8","C. macrosperma"))
-```
-
-```{r}
-g=f[f$Species=="C. brenneri"|f$Species=="C. remanei"|f$Species=="C. sp. 8"|f$Species=="C. macrosperma",]
-p<-ggplot(g,aes(factor(Strain), area))
-p + facet_wrap(~Species,ncol = 3,scales = "free_x")+geom_violin(aes(fill = Species)) + geom_jitter(position = position_jitter(width = .2),alpha=0.5,)+
-	theme(legend.position = "none") +ylab( expression(paste("area (", mu, m^{2},")")))+xlab("Strain")+theme(panel.margin = unit(0.05, "lines"))+
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-    panel.background = element_blank(), axis.line = element_line(colour = "black"))
 ```
 
 figure 3B
