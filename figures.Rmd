@@ -2,7 +2,7 @@
 title: "Sperm size figures"
 author: "jeremy"
 date: "Wednesday, January 14, 2015"
-output: html_document
+output: pdf_document
 ---
 
 Sperm size figures
@@ -46,12 +46,16 @@ Let's read in the compiled data
 setwd("C:/Users/jeremy/Desktop/geiger")
 #change to your working directory!!!!
 f<-read.table("compileddata.csv",header=T,sep=",")
+oocytesize<-read.table("oocyteSizeCaeno.csv",header=T,sep=",")
+primaryspermatocyte<-read.table("PrimarySpermatocyteSize.csv",header=T,sep=",")
 ```
 
-The given species names were a little off - let's fix them
+The given species names were a little off - let's fix them. The oocyte ones and spermatocyte ones are too, as well as inconsistent across the files. 
+Let's fix it:
 
 ```{r}
 weneednewnames <- list("brenneri"="C. brenneri",
+                       "C. brenneri"="C. brenneri",
                        "C. angaria"="C. angaria",
                        "C. briggsae"="C. briggsae",
                        "C. drosophilae"="C. drosophilae",
@@ -59,28 +63,60 @@ weneednewnames <- list("brenneri"="C. brenneri",
                        "C. japonica"="C. japonica",
                        "C. plicata"="C. plicata",
                        "C. remanei"="C. remanei",
+                       "C. sp1"="C. sp. 1",
                        "C. sp 1"="C. sp. 1",
+                       "C. sp8"="C. sp. 8",
                        "C. sp 8"="C. sp. 8",
+                       "C. sp10"="C. doughertyi",
                        "C. sp. 10"="C. doughertyi",
+                       "C. sp11"="C. tropicalis",
                        "C. sp. 11"="C. tropicalis",
+                       "C. sp12"="C. castelli",
                        "C. sp. 12"="C. castelli",
+                       "C. sp13"="C. virilis",
                        "C. sp. 13"="C. virilis",
+                       "C. sp14"="C. imperialis",
                        "C. sp. 14"="C. imperialis",
+                       "C. sp15"="C. kamaaina",
                        "C. sp. 15"="C. kamaaina",
+                       "C. sp16"="C. wallacei",
                        "C. sp. 16"="C. wallacei",
+                       "C. sp17"="C. nouraguensis",
                        "C. sp. 17"="C. nouraguensis",
+                       "C. sp 18"="C. macrosperma",
+                       "C. sp18"="C. macrosperma",
                        "C. sp. 18"="C. macrosperma",
+                       "C. sp19"="C. yunquensis",
                        "C. sp. 19"="C. yunquensis",
+                       "C. sp2"="C. sp. 2",
                        "C. sp. 2"="C. sp. 2",
                        "C. sp. 20"="C. guadeloupensis",
+                       "C. sp5"="C. sp. 5",
                        "C. sp. 5"="C. sp. 5",
+                       "C. sp6"="C. portoensis",
                        "C. sp. 6"="C. portoensis",
+                       "C. sp7"="C. afra",
                        "C. sp. 7"="C. afra",
+                       "C. sp9"="C. nigoni",
                        "C. sp. 9"="C. nigoni")
 f$Species<-weneednewnames[f$Species]
 f$Species<-as.factor(unlist(f$Species))
+
+oocytesize$Species<-weneednewnames[oocytesize$Species]
+oocytesize$Species<-as.factor(unlist(oocytesize$Species))
+
+primaryspermatocyte$Species<-weneednewnames[primaryspermatocyte$Species]
+primaryspermatocyte$Species<-as.factor(unlist(primaryspermatocyte$Species))
+
 spermsize1<-f %>% group_by(Species) %>% summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
 rownames(spermsize1) <- spermsize1$Species
+
+oocytesize1<-oocytesize %>% group_by(Species) %>% summarise(means=mean(volume.um3,na.rm=T),cv=sd(volume.um3,na.rm=T)/mean(volume.um3,na.rm=T))
+rownames(oocytesize1) <- oocytesize1$Species
+
+primaryspermatocyte1<-primaryspermatocyte %>% group_by(Species) %>% summarise(means=mean(Primary.Spermatocyte.Size..area.um2.,na.rm=T),cv=sd(Primary.Spermatocyte.Size..area.um2.,na.rm=T)/mean(Primary.Spermatocyte.Size..area.um2.,na.rm=T))
+rownames(primaryspermatocyte1) <- primaryspermatocyte1$Species
+
 ```
 
 ok and now the figures - figure 1D
@@ -114,6 +150,40 @@ rownames(spermsize1) <- spermsize1$Species
 spermsize1 <- spermsize1[match(tr$tip.label,rownames(spermsize1)),]
 x1 <- pic(spermsize1$means, tr)
 y1 <- pic(spermsize1$cv, tr)
+#cor.test(x1,y1)
+plot(y1~x1,xlab="PIC of Sperm Size",ylab="PIC of CV",pch=19)
+fit1=lm(y1~x1)
+abline(fit1$coefficients,lwd=2,col=8)
+p=anova(fit1)$P[1]
+rp = vector('expression',1)
+rp[2]=substitute(expression(italic(p) == MYVALUE), list(MYVALUE = format(p,dig=3)))[2]
+legend("bottomright",bty="n",legend=rp)
+```
+
+oocyte size
+
+```{r}
+tr1<-drop.tip(tr,tr$tip.label[!(tr$tip.label %in% oocytesize1$Species)])
+oocytesize1 <- oocytesize1[match(tr1$tip.label,rownames(oocytesize1)),]
+x1 <- pic(oocytesize1$means, tr1)
+y1 <- pic(oocytesize1$cv, tr1)
+#cor.test(x1,y1)
+plot(y1~x1,xlab="PIC of Sperm Size",ylab="PIC of CV",pch=19)
+fit1=lm(y1~x1)
+abline(fit1$coefficients,lwd=2,col=8)
+p=anova(fit1)$P[1]
+rp = vector('expression',1)
+rp[2]=substitute(expression(italic(p) == MYVALUE), list(MYVALUE = format(p,dig=3)))[2]
+legend("bottomright",bty="n",legend=rp)
+```
+
+primaryspermatocyte
+
+```{r}
+tr1<-drop.tip(tr,tr$tip.label[!(tr$tip.label %in% primaryspermatocyte1$Species)])
+primaryspermatocyte1 <- primaryspermatocyte1[match(tr1$tip.label,rownames(primaryspermatocyte1)),]
+x1 <- pic(primaryspermatocyte1$means, tr1)
+y1 <- pic(primaryspermatocyte1$cv, tr1)
 #cor.test(x1,y1)
 plot(y1~x1,xlab="PIC of Sperm Size",ylab="PIC of CV",pch=19)
 fit1=lm(y1~x1)
