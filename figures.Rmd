@@ -42,6 +42,7 @@ plot(tr)
 
 Let's read in the compiled data, and apply a quick filter:
 instructions say:"the most relevant measure would be the stage -1 and I would ignore the others."
+primary spermatocyte also includes a couple hermaphrodites - let's chuck em out
 
 ```{r}
 setwd("C:/Users/jeremy/Desktop/geiger")
@@ -49,6 +50,7 @@ spermsizes<-read.table("compileddata.csv",header=T,sep=",")
 oocytesize<-read.table("oocyteSizeCaeno.csv",header=T,sep=",")
 primaryspermatocyte<-read.table("PrimarySpermatocyteSize.csv",header=T,sep=",")
 oocytesize<-oocytesize[oocytesize$oocyte.stage==-1,]
+primaryspermatocyte<-primaryspermatocyte[primaryspermatocyte$Sex=="male",]
 ```
 
 The given species names were a little off - let's fix them. The oocyte ones and spermatocyte ones are too, as well as inconsistent across the files. 
