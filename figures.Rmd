@@ -198,6 +198,36 @@ plotpic2(spermsize1,primaryspermatocyte1,tr)
 plotpic2(primaryspermatocyte1,oocytesize1,tr)
 ```
 
+Some phylogenetic signal methods - lambda
+
+```{r}
+fitlambda<-function(df,tr){
+  holding<-df$mean
+  names(holding)<-df$Species
+  fitContinuous(tr,holding)
+}
+
+fitlambda(spermsize1,tr)
+fitlambda(oocytesize1,tr)
+fitlambda(primaryspermatocyte1,tr)
+
+```
+
+Blombergs K
+```{r}
+fitblomberg<-function(df,tr){
+  holding<-df$mean
+  names(holding)<-df$Species
+  phylosignal(holding,tr)
+}
+
+fitblomberg(spermsize1,tr)
+fitblomberg(oocytesize1,tr)
+fitblomberg(primaryspermatocyte1,tr)
+```
+
+
+
 figure 3A with violin plots
 
 ```{r}
