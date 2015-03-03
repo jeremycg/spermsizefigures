@@ -204,7 +204,7 @@ Some phylogenetic signal methods - lambda
 fitlambda<-function(df,tr){
   holding<-df$mean
   names(holding)<-df$Species
-  fitContinuous(tr,holding)
+  fitContinuous(tr,holding,method="lambda")
 }
 
 fitlambda(spermsize1,tr)
@@ -226,7 +226,31 @@ fitblomberg(oocytesize1,tr)
 fitblomberg(primaryspermatocyte1,tr)
 ```
 
+Morans I
+```{r}
+fitmoran<-function(df,tr){
+  tr<-drop.tip(tr,tr$tip.label[!(tr$tip.label %in% df$Species)])
+  holding<-df$mean
+  names(holding)<-df$Species
+  abouheif.moran(holding,W=proxTips(tr))
+}
+fitmoran(spermsize1,tr)
+fitmoran(oocytesize1,tr)
+fitmoran(primaryspermatocyte1,tr)
+```
 
+abouheifs cmean
+```{r}
+fitabouheif<-function(df,tr){
+  tr<-drop.tip(tr,tr$tip.label[!(tr$tip.label %in% df$Species)])
+  holding<-df$mean
+  names(holding)<-df$Species
+  abouheif.moran(holding,W=proxTips(tr),method="oriAbouheif")
+}
+fitabouheif(spermsize1,tr)
+fitabouheif(oocytesize1,tr)
+fitabouheif(primaryspermatocyte1,tr)
+```
 
 figure 3A with violin plots
 
