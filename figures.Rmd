@@ -19,6 +19,8 @@ library(geiger)
 library(dplyr)
 library(ggplot2)
 library(Hmisc)
+library(picante)
+library(adephylo)
 ```
 
 Here's the tree from Kiontke et al 2011, figure 3
@@ -206,7 +208,7 @@ Some phylogenetic signal methods - lambda
 fitlambda<-function(df,tr){
   holding<-df$mean
   names(holding)<-df$Species
-  fitContinuous(tr,holding,method="lambda")
+  fitContinuous(tr,holding,model="lambda")
 }
 
 fitlambda(spermsize1,tr)
@@ -276,36 +278,40 @@ violinit(primaryspermatocyte,c("C. brenneri","C. remanei","C. sp. 8","C. macrosp
 figure 3B
 
 ```{r}
-spermsize2.1<-spermsize3 %>% summarise(cv=sd(means)/mean(means),means=mean(means),plotter="between individuals")
-spermsize2.1$individual="dropped"
-spermsize1.1<-spermsize2.1 %>% summarise(cv=sd(means)/mean(means),means=mean(means),plotter="between strains")
-spermsize1.1$individual="dropped"
-spermsize1.1$Strain="dropped"
-spermsize3.1<-spermsize3
-spermsize3.1$plotter<-"intra individual"
-clumper<-function(species){
-	holding=spermsize3.1[spermsize3.1$Species==species,]
-	holding=rbind(holding,spermsize2.1[spermsize2.1$Species==species,])
-	holding=rbind(holding,spermsize1.1[spermsize1.1$Species==species,])
-	holding$plotter<-factor(holding$plotter,levels=c("intra individual","between individuals","between strains"))
+clumper<-function(species,dfindv,dfstrain,dfspecies){
+  holding=dfindv[dfindv$Species==species,]
+  holding=rbind(holding,dfstrain[dfstrain$Species==species,])
+  holding=rbind(holding,dfspecies[dfspecies$Species==species,])
+  holding$plotter<-factor(holding$plotter,levels=c("intra individual","between individuals","between strains"))
   holding$plotcolour<-as.numeric(factor(holding$Strain))
-	return(holding)
+  return(holding)
 }
 
-plotter<-function(strainlist){
-		x<-clumper(strainlist[1])
-		if(length(strainlist)>1){
-			for(i in 2:length(strainlist)){
-				x=rbind(x,clumper(strainlist[i]))
-				}
-			}
-		p<-ggplot(x,aes(factor(plotter),cv))
-		p+geom_jitter(aes(colour = factor(plotcolour),size = 5),position = position_jitter(width = .2))+facet_wrap(~Species,ncol = length(strainlist),scales = "free_x")+
+plotcvbysplits<-function(df,strainlist){
+  dfstrain<-df%>% summarise(cv=sd(means)/mean(means),means=mean(means),plotter="between individuals")
+  dfstrain$individual<-"dropped"
+  dfspecies<-dfstrain %>% summarise(cv=sd(means)/mean(means),means=mean(means),plotter="between strains")
+  dfspecies$individual="dropped"
+  dfspecies$Strain="dropped"
+  dfindv<-df
+  dfindv$plotter<-"intra individual"
+  x<-clumper(strainlist[1],dfindv,dfstrain,dfspecies)
+  if(length(strainlist)>1){
+    for(i in 2:length(strainlist)){
+      x=rbind(x,clumper(strainlist[i],dfindv,dfstrain,dfspecies))
+    }
+  }
+  p<-ggplot(x,aes(factor(plotter),cv))
+  p+geom_jitter(aes(colour = factor(plotcolour),size = 5),position = position_jitter(width = .2))+facet_wrap(~Species,ncol = length(strainlist),scales = "free_x")+
     theme(panel.margin = unit(0.05, "lines"),legend.position = "none")+xlab("")+
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-       panel.background = element_blank(),axis.line = element_line(colour = "black"))
-	}
-plotter(c("C. brenneri","C. remanei","C. sp. 8","C. macrosperma"))
+          panel.background = element_blank(),axis.line = element_line(colour = "black"))
+}
+
+
+plotcvbysplits(primaryspermatocyte3,c("C. brenneri","C. remanei","C. sp. 8","C. macrosperma"))
+plotcvbysplits(spermsize3,c("C. brenneri","C. remanei","C. sp. 8","C. macrosperma"))
+plotcvbysplits(oocytesize3,c("C. brenneri","C. remanei","C. sp. 8","C. macrosperma"))
 ```
 
 figure mockup a
@@ -357,7 +363,7 @@ figure1a - bars
 need to rerun the above
 
 ```{r}
-spermsize2<-f %>% group_by(Species,Strain) %>% summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T),sem=mean(area,na.rm=T)/sqrt(n()))
+spermsize2<-ff %>% group_by(Species,Strain) %>% summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T),sem=mean(area,na.rm=T)/sqrt(n()))
 countspec=function(dataframe){
 	holding=c()
 	for(i in 1:nrow(dataframe)){
@@ -413,9 +419,9 @@ large tree
 first group all the data
 
 ```{r}
-spermsize1<-f %>% group_by(Species) %>% summarise(means=mean(area,na.rm=T))
-spermsize2<-f %>% group_by(Species,Strain) %>% summarise(means=mean(area,na.rm=T))
-spermsize3<-f %>% group_by(Species,Strain,individual) %>% summarise(means=mean(area,na.rm=T))
+spermsize1<-ff %>% group_by(Species) %>% summarise(means=mean(area,na.rm=T))
+spermsize2<-ff %>% group_by(Species,Strain) %>% summarise(means=mean(area,na.rm=T))
+spermsize3<-ff %>% group_by(Species,Strain,individual) %>% summarise(means=mean(area,na.rm=T))
 ```
 
 function to fix the format of spermsizes, and fit tree
