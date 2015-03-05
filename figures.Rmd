@@ -53,6 +53,8 @@ oocytesize<-read.table("oocyteSizeCaeno.csv",header=T,sep=",")
 primaryspermatocyte<-read.table("PrimarySpermatocyteSize.csv",header=T,sep=",")
 oocytesize<-oocytesize[oocytesize$oocyte.stage==-1,]
 primaryspermatocyte<-primaryspermatocyte[primaryspermatocyte$Sex=="male",]
+oocytesizearea<-read.csv("oocyteSizearea.csv")
+oocytesizearea<-oocytesizearea[oocytesizearea$oocyte.stage==-1,]
 ```
 
 The given species names were a little off - let's fix them. The oocyte ones and spermatocyte ones are too, as well as inconsistent across the files. 
@@ -115,6 +117,7 @@ renameworms<-function(df){
 spermsizes<-renameworms(spermsizes)
 oocytesize<-renameworms(oocytesize)
 primaryspermatocyte<-renameworms(primaryspermatocyte)
+oocytesizearea<-renameworms(oocytesizearea)
 ```
 
 names should now be uniform.
@@ -155,6 +158,11 @@ primaryspermatocyte1<-clusterer(primaryspermatocyte)
 primaryspermatocyte2<-clusterer2(primaryspermatocyte)
 primaryspermatocyte3<-clusterer3(primaryspermatocyte)
 
+names(oocytesizearea)<-c("Species","Strain","individual","oocyte.stage","length.um","width.um","area")
+oocytesizearea1<-clusterer(oocytesizearea)
+oocytesizearea2<-clusterer2(oocytesizearea)
+oocytesizearea3<-clusterer3(oocytesizearea)
+
 ```
 
 And now with PIC, figure 1D
@@ -177,6 +185,7 @@ plotpic<-function(df,tree){
 plotpic(spermsize1,tr)
 plotpic(oocytesize1,tr)
 plotpic(primaryspermatocyte1,tr)
+plotpic(oocytesizearea1,tr)
 ```
 
 Let's try some PIC of spermsize vs oocyte size!
@@ -200,6 +209,9 @@ plotpic2<-function(df1,df2,tree){
 plotpic2(spermsize1,oocytesize1,tr)
 plotpic2(spermsize1,primaryspermatocyte1,tr)
 plotpic2(primaryspermatocyte1,oocytesize1,tr)
+plotpic2(spermsize1,oocytesizearea1,tr)
+plotpic2(primaryspermatocyte1,oocytesizearea1,tr)
+plotpic2(oocytesizearea1,oocytesize1,tr)
 ```
 
 Some phylogenetic signal methods - lambda
@@ -214,6 +226,7 @@ fitlambda<-function(df,tr){
 fitlambda(spermsize1,tr)
 fitlambda(oocytesize1,tr)
 fitlambda(primaryspermatocyte1,tr)
+fitlambda(oocytesizearea1,tr)
 
 ```
 
@@ -228,6 +241,7 @@ fitblomberg<-function(df,tr){
 fitblomberg(spermsize1,tr)
 fitblomberg(oocytesize1,tr)
 fitblomberg(primaryspermatocyte1,tr)
+fitblomberg(oocytesizearea1,tr)
 ```
 
 Morans I
@@ -241,6 +255,7 @@ fitmoran<-function(df,tr){
 fitmoran(spermsize1,tr)
 fitmoran(oocytesize1,tr)
 fitmoran(primaryspermatocyte1,tr)
+fitmoran(oocytesizearea1,tr)
 ```
 
 abouheifs cmean
@@ -254,6 +269,7 @@ fitabouheif<-function(df,tr){
 fitabouheif(spermsize1,tr)
 fitabouheif(oocytesize1,tr)
 fitabouheif(primaryspermatocyte1,tr)
+fitabouheif(oocytesizearea1,tr)
 ```
 
 figure 3A with violin plots
@@ -273,6 +289,7 @@ violinit<-function(f,specieslist){
 violinit(spermsizes,c("C. brenneri","C. remanei","C. sp. 8","C. macrosperma"))
 violinit(oocytesize,c("C. brenneri","C. remanei","C. sp. 8","C. macrosperma"))
 violinit(primaryspermatocyte,c("C. brenneri","C. remanei","C. sp. 8","C. macrosperma"))
+violinit(oocytesizearea,c("C. brenneri","C. remanei","C. sp. 8","C. macrosperma"))
 ```
 
 figure 3B
@@ -312,6 +329,7 @@ plotcvbysplits<-function(df,strainlist){
 plotcvbysplits(primaryspermatocyte3,c("C. brenneri","C. remanei","C. sp. 8","C. macrosperma"))
 plotcvbysplits(spermsize3,c("C. brenneri","C. remanei","C. sp. 8","C. macrosperma"))
 plotcvbysplits(oocytesize3,c("C. brenneri","C. remanei","C. sp. 8","C. macrosperma"))
+plotcvbysplits(oocytesizearea3,c("C. brenneri","C. remanei","C. sp. 8","C. macrosperma"))
 ```
 
 figure mockup a
