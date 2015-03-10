@@ -219,7 +219,7 @@ plotpic2(primaryspermatocyte1,oocytesizearea1,tr)
 plotpic2(oocytesizearea1,oocytesize1,tr)
 ```
 
-pgls
+pgls - first with lambda, then with OU model.
 
 ```{r}
 firsttwo<-merge(spermsize1,primaryspermatocyte1,by="Species",all=T)
@@ -231,7 +231,14 @@ mod1 <- pgls(meansperm ~ meanooarea, compsperm, lambda='ML')
 mod2 <- pgls(meansperm ~ meanoo, compsperm, lambda='ML')
 mod3 <- pgls(meansperm ~ meanprimsp, compsperm, lambda='ML')
 
+rownames(fullpglsframe)<-fullpglsframe$Species
+mod1ou <-gls(meansperm~meanooarea,correlation=corMartins(1,phy=tr),data=fullpglsframe)
+mod2ou <-gls(meansperm~meanoo,correlation=corMartins(1,phy=tr),data=fullpglsframe)
+mod3ou <-gls(meansperm~meanprimsp,correlation=corMartins(1,phy=tr),data=fullpglsframe)
 ```
+
+pgls using the ou method
+
 
 Some phylogenetic signal methods - lambda
 
