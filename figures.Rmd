@@ -10,9 +10,9 @@ Sperm size figures
 
 This is the output of an R markdown script - a fancy way of embedding r in a page so we can rerun/tune it as needed and then have the commands
 
-First we gotta load libraries:
+I'm embedding, but hiding a bynch of stuff for readability - the actual code is in the .Rmd file.
 
-```{r}
+```{r,echo=FALSE,hide=TRUE,message=FALSE}
 library(phytools)
 library(ape)
 library(geiger)
@@ -26,28 +26,24 @@ library(caper)
 
 Here's the tree from Kiontke et al 2011, figure 3
 intial values I recieved had angaria and sp12 flipped - I've corrected it here
+Here's the tree:
 
-```{r}
+```{r,echo=FALSE}
 tr<-read.tree(text="(C. sp. 1:0.356,(C. plicata:0.3,((C. guadeloupensis:0.223,((C. portoensis:0.158,C. virilis:0.201):0.005,((C. sp. 8:0.169,(C. angaria:0.031,C. castelli:0.037):0.131):0.073,(C. drosophilae:0.027,C. sp. 2:0.03):0.161):0.047):0.033):0.074,((C. kamaaina:0.14,(C. japonica:0.16,((C. imperialis:0.082,C. afra:0.182):0.009,((C. yunquensis:0.086,C. nouraguensis:0.085):0.038,C. macrosperma:0.159):0.057):0.012):0.059):0.041,(C. elegans:0.166,(((C. brenneri:0.129,C. doughertyi:0.111):0.042,(C. wallacei:0.083,C. tropicalis:0.07):0.033):0.013,(C. remanei:0.129,(C. sp. 5:0.127,(C. briggsae:0.047,C. nigoni:0.032):0.088):0.02):0.017):0.046):0.02):0.195):0.07):0.259);")
-```
 
-The input read is a little ghetto - let's rename everthing now it's in
-
-```{r}
 tr$tip.label<-c("C. sp. 1","C. plicata","C. guadeloupensis","C. portoensis","C. virilis","C. sp. 8","C. angaria","C. castelli","C. drosophilae","C. sp. 2","C. kamaaina","C. japonica","C. imperialis","C. afra","C. yunquensis","C. nouraguensis","C. macrosperma","C. elegans","C. brenneri","C. doughertyi","C. wallacei","C. tropicalis","C. remanei","C. sp. 5","C. briggsae","C. nigoni")
-```
 
-And plot out the normal tree
-
-```{r}
 plot(tr)
 ```
 
-Let's read in the compiled data, and apply a quick filter:
-instructions say:"the most relevant measure would be the stage -1 and I would ignore the others."
-primary spermatocyte also includes a couple hermaphrodites - let's chuck em out
+Now read in the compiled data - we have oocytesize, spermsize, primaryspermatocytesize, and oocytearea. The species names in the files are inconsistent - they are fixed now. For now, the oocyte area is using the area formulation as made by the initial sperm size formula. All response variables are logged unless otherwise noted.
 
-```{r}
+I have filtered out some of the data: Any oocytesize that is not stage -1, and any primaryspermatocyte data that is from hermaphrodites rather than males.
+
+We now have clean data, clustered into species, strains or individuals. Variables ending in 1 are in species, 2 are strains and 3 are individuals. The non-clustered data is as is.
+
+
+```{r,echo=FALSE}
 setwd("C:/Users/jeremy/Desktop/geiger")
 spermsizes<-read.table("compileddata.csv",header=T,sep=",")
 oocytesize<-read.table("oocyteSizeCaeno.csv",header=T,sep=",")
@@ -56,12 +52,7 @@ oocytesize<-oocytesize[oocytesize$oocyte.stage==-1,]
 primaryspermatocyte<-primaryspermatocyte[primaryspermatocyte$Sex=="male",]
 oocytesizearea<-read.csv("oocyteSizearea.csv")
 oocytesizearea<-oocytesizearea[oocytesizearea$oocyte.stage==-1,]
-```
 
-The given species names were a little off - let's fix them. The oocyte ones and spermatocyte ones are too, as well as inconsistent across the files. 
-Let's fix it:
-
-```{r}
 weneednewnames <- list("brenneri"="C. brenneri",
                        "C. brenneri"="C. brenneri",
                        "C. angaria"="C. angaria",
@@ -120,13 +111,7 @@ spermsizes<-renameworms(spermsizes)
 oocytesize<-renameworms(oocytesize)
 primaryspermatocyte<-renameworms(primaryspermatocyte)
 oocytesizearea<-renameworms(oocytesizearea)
-```
 
-names should now be uniform.
-
-Let's cluster stuff by mean and cv
-
-```{r}
 clusterer<-function(df){
   x<-df %>% group_by(Species) %>% 
     summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
@@ -169,17 +154,12 @@ oocytesizearea1<-clusterer(oocytesizearea)
 oocytesizearea2<-clusterer2(oocytesizearea)
 oocytesizearea3<-clusterer3(oocytesizearea)
 
-```
-
-And now with PIC, figure 1D. This is plotting mean vs cv of the traits, by PIC
-
-```{r}
-plotpic<-function(df,tree){
+plotpic<-function(df,tree,title,xlab,ylab){
   tree<-drop.tip(tree,tree$tip.label[!(tree$tip.label %in% df$Species)])
   df <- df[match(tree$tip.label,rownames(df)),]
   x1 <- pic(df$means, tree)
   y1 <- pic(df$cv, tree)
-  plot(y1~x1,xlab="PIC of Sperm Size",ylab="PIC of CV",pch=19)
+  plot(y1~x1,xlab=xlab,ylab=ylab,main=title,pch=19)
   fit1=lm(y1~x1)
   abline(fit1$coefficients,lwd=2,col=8)
   p=anova(fit1)$P[1]
@@ -187,24 +167,30 @@ plotpic<-function(df,tree){
   rp[2]=substitute(expression(italic(p) == MYVALUE), list(MYVALUE = format(p,dig=3)))[2]
   legend("bottomright",bty="n",legend=rp)
 }
-
-plotpic(spermsize1,tr)
-plotpic(oocytesize1,tr)
-plotpic(primaryspermatocyte1,tr)
-plotpic(oocytesizearea1,tr)
 ```
 
-Let's try some PIC of spermsize vs oocyte size!
+###PIC plots - mean vs CV
 
-```{r}
-plotpic2<-function(df1,df2,tree,title=""){
+Plotting the phylogenetic independent contrasts (PIC) of means of traits vs CV of traits. All means and CVs are grouped at strain level.
+
+```{r,echo=FALSE}
+plotpic(spermsize1,tr,"PIC of spermsize means vs CV","spermsize","CV")
+plotpic(oocytesize1,tr,"PIC of oocytesize means vs CV","oocytesize","CV")
+plotpic(primaryspermatocyte1,tr,"PIC of spermatocytesize means vs CV","spermatocytesize","CV")
+plotpic(oocytesizearea1,tr,"PIC of oocytesizearea means vs CV","oocytesize","CV")
+```
+
+###PIC plots - traits vs traits
+
+```{r,echo=FALSE}
+plotpic2<-function(df1,df2,tree,title,xlab,ylab){
   df<-merge(df1,df2,by="Species")
   tree<-drop.tip(tree,tree$tip.label[!(tree$tip.label %in% df$Species)])
   rownames(df)<-df$Species
   df <- df[match(tree$tip.label,rownames(df)),]
   x1 <- pic(df$means.x, tree)
   y1 <- pic(df$means.y, tree)
-  plot(y1~x1,pch=19,main=title)
+  plot(y1~x1,pch=19,main=title,xlab=xlab,ylab=ylab)
   fit1=lm(y1~x1)
   abline(fit1$coefficients,lwd=2,col=8)
   p=anova(fit1)$P[1]
@@ -212,17 +198,19 @@ plotpic2<-function(df1,df2,tree,title=""){
   rp[2]=substitute(expression(italic(p) == MYVALUE), list(MYVALUE = format(p,dig=3)))[2]
   legend("bottomright",bty="n",legend=rp)
 }
-plotpic2(spermsize1,oocytesize1,tr)
-plotpic2(spermsize1,primaryspermatocyte1,tr)
-plotpic2(primaryspermatocyte1,oocytesize1,tr)
-plotpic2(spermsize1,oocytesizearea1,tr)
-plotpic2(primaryspermatocyte1,oocytesizearea1,tr)
-plotpic2(oocytesizearea1,oocytesize1,tr)
+plotpic2(spermsize1,oocytesize1,tr,"PIC of spermsize vs oocytesize","spermsize","oocytesize")
+plotpic2(spermsize1,primaryspermatocyte1,tr,"PIC of spermsize vs spermatocytesize","spermsize","spermatocytesize")
+plotpic2(primaryspermatocyte1,oocytesize1,tr,"PIC of spermatocytesize vs oocytesize","spermatocyte","oocytesize")
+plotpic2(spermsize1,oocytesizearea1,tr,"PIC of spermsize vs oocytearea","spermsize","oocytearea")
+plotpic2(primaryspermatocyte1,oocytesizearea1,tr,"PIC of spermatocytesize vs oocytearea","spermatocyte","oocytearea")
+plotpic2(oocytesizearea1,oocytesize1,tr,"PIC of oocytesize vs oocytearea","oocytesize","oocytearea")
 ```
 
-pgls - first with lambda, then with OU model.
+###PGLS - testing for correlation with evolutionary models
 
-```{r}
+Output are summary tables from fits. The OU model won't fit the spermatocyte fits due to overparameterisation.
+
+```{r,echo=FALSE,warning=FALSE}
 firsttwo<-merge(spermsize1,primaryspermatocyte1,by="Species",all=T)
 secondtwo<-merge(oocytesizearea1,oocytesize1,by="Species",all=T)
 fullpglsframe<-merge(firsttwo,secondtwo,by="Species",all=T)
@@ -232,25 +220,32 @@ mod1 <- pgls(meansperm ~ meanooarea, compsperm, lambda='ML')
 mod2 <- pgls(meansperm ~ meanoo, compsperm, lambda='ML')
 mod3 <- pgls(meansperm ~ meanprimsp, compsperm, lambda='ML')
 
+summary(mod1)
+summary(mod2)
+summary(mod3)
+
 rownames(fullpglsframe)<-fullpglsframe$Species
 mod1ou <-gls(meansperm~meanooarea,correlation=corMartins(1,phy=tr),data=fullpglsframe)
 mod2ou <-gls(meansperm~meanoo,correlation=corMartins(1,phy=tr),data=fullpglsframe)
 #mod3ou <-gls(meansperm~meanprimsp,correlation=corMartins(1,phy=drop.tip(tr,tr$tip.label[!(tr$tip.label %in% primaryspermatocyte1$Species)])),data=fullpglsframe,na.action=na.omit)
+
+summary(mod1ou)
+summary(mod2ou)
 ```
 
 Some phylogenetic signal methods - lambda
 
-```{r}
+```{r,echo=FALSE,warning=FALSE}
 fitlambda<-function(df,tr){
   holding<-df$mean
   names(holding)<-df$Species
   fitContinuous(tr,holding,model="lambda")
 }
 
-fitlambda(spermsize1,tr)
-fitlambda(oocytesize1,tr)
-fitlambda(primaryspermatocyte1,tr)
-fitlambda(oocytesizearea1,tr)
+summary(fitlambda(spermsize1,tr))
+summary(fitlambda(oocytesize1,tr))
+summary(fitlambda(primaryspermatocyte1,tr))
+summary(fitlambda(oocytesizearea1,tr))
 
 ```
 
@@ -361,7 +356,7 @@ we are starting agin here, as I've modified some of the variables etc above
 Easier to start with a clean slate
 Clean and read in data:
 
-```{r}
+```{r,echo=FALSE}
 library(phytools)
 library(ape)
 library(geiger)
