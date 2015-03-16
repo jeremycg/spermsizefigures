@@ -250,7 +250,7 @@ summary(fitlambda(oocytesizearea1,tr))
 ```
 
 Blombergs K
-```{r}
+```{r,echo=FALSE,warning=FALSE}
 fitblomberg<-function(df,tr){
   holding<-df$mean
   names(holding)<-df$Species
@@ -264,7 +264,7 @@ fitblomberg(oocytesizearea1,tr)
 ```
 
 Morans I
-```{r}
+```{r,echo=FALSE,warning=FALSE}
 fitmoran<-function(df,tr){
   tr<-drop.tip(tr,tr$tip.label[!(tr$tip.label %in% df$Species)])
   holding<-df$mean
@@ -278,7 +278,7 @@ fitmoran(oocytesizearea1,tr)
 ```
 
 abouheifs cmean
-```{r}
+```{r,echo=FALSE,warning=FALSE}
 fitabouheif<-function(df,tr){
   tr<-drop.tip(tr,tr$tip.label[!(tr$tip.label %in% df$Species)])
   holding<-df$mean
@@ -293,7 +293,7 @@ fitabouheif(oocytesizearea1,tr)
 
 figure 3A with violin plots
 
-```{r}
+```{r,echo=FALSE,warning=FALSE}
 violinit<-function(f,specieslist){
   g=f[f$Species%in%specieslist,]
   p<-ggplot(g,aes(factor(Strain), area))
@@ -313,7 +313,7 @@ violinit(oocytesizearea,c("C. brenneri","C. remanei","C. sp. 8","C. macrosperma"
 
 figure 3B
 
-```{r}
+```{r,echo=FALSE,warning=FALSE}
 clumper<-function(species,dfindv,dfstrain,dfspecies){
   holding=dfindv[dfindv$Species==species,]
   holding=rbind(holding,dfstrain[dfstrain$Species==species,])
