@@ -22,6 +22,7 @@ library(Hmisc)
 library(picante)
 library(adephylo)
 library(caper)
+library(ggtree)
 ```
 
 Here's the tree from Kiontke et al 2011, figure 3
@@ -566,31 +567,10 @@ AncSperm=x$ace
 spermsize1$Species <- factor(spermsize1$Species, levels = c("C. sp. 1","C. plicata","C. guadeloupensis","C. portoensis","C. virilis","C. sp. 8","C. angaria","C. castelli","C. drosophilae","C. sp. 2","C. kamaaina","C. japonica","C. imperialis","C. afra","C. yunquensis","C. nouraguensis","C. macrosperma","C. elegans","C. brenneri","C. doughertyi","C. wallacei","C. tropicalis","C. remanei","C. sp. 5","C. briggsae","C. nigoni"))
 spermsize=spermsize1[order(spermsize1$Species),]$means
 names(spermsize)<-spermsize1[order(spermsize1$Species),]$Species
-plot(tr,label.offset=0,no.margin = TRUE,show.tip.label = F,x.lim=c(0,1),edge.width=1.5,edge.color=c(1))
-#loads the graph into memory, then plots the anc. states on the nodes
-#this is taken more or less from Nicos function
-lastPP <- get("last_plot.phylo", envir = .PlotPhyloEnv)
-  node <- (lastPP$Ntip + 1):length(lastPP$xx)
-  XX <- lastPP$xx[node]
-  YY <- lastPP$yy[node]
-  for (i in 1:length(XX))
-  {
-    if (round(AncSperm[i], digits=1)==59.6)#this is a horrible hack to fix the labels if they are too big
-    {
-      points(XX[i],YY[i],col="red",lwd=round(AncSperm[i], digits=1)/max(round(spermsize,digit=1))*50,pch=19)
-      text(XX[i]+0.02,YY[i],labels=round(AncSperm[i], digits=1),col="black",cex=1.2,adj=c(1,0))
-    }
-    else{
-    points(XX[i],YY[i],col="red",lwd=round(AncSperm[i], digits=1)/max(round(spermsize,digit=1))*50,pch=19)
-    text(XX[i],YY[i],labels=round(AncSperm[i], digits=1),col="black",cex=1.4,adj=c(1,0))
-    }
-  }
-#now we label the tips
-tip <- 1:lastPP$Ntip
-XX <- lastPP$xx[tip]
-YY <- lastPP$yy[tip]
-
-points(XX,YY,col="blue",lwd=(round(spermsize,digit=1)/max(round(spermsize,digit=1))*50),pch=19)
-text(XX+0.15,YY,labels=round(spermsize,digit=1),col="blue",cex=1.4)
-text(XX+0.07,YY,labels=c("C. sp. 1","C. plicata","C. guadeloupensis","C. portoensis","C. virilis","C. sp. 8","C. angaria","C. castelli","C. drosophilae","C. sp. 2","C. kamaaina","C. japonica","C. imperialis","C. afra","C. yunquensis","C. nouraguensis","C. macrosperma", "C. elegans","C. brenneri","C. doughertyi","C. wallacei","C. tropicalis","C. remanei","C. sp. 5","C. briggsae","C. nigoni"),col="black",cex=1.2,font=3)
+ggtree(tr)+geom_text(aes(label=label),hjust=-0.19,fontface="italic")+geom_point(subset=.(!isTip), 
+           color="#1b9e77", size=sqrt(AncSperm/pi))+
+           geom_point(subset=.(isTip),color="#7570b3", size=sqrt(spermsize/pi))+
+           geom_text(subset=.(isTip),aes(label=round(spermsize,1)), hjust=1, vjust=-0.4, size=3)+
+           geom_text(subset=.(!isTip),aes(label=round(AncSperm,1)), hjust=1.5, vjust=-0.4, size=3)+
+           scale_x_continuous(expand = c(0.1, 0.1))
 ```
