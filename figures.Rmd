@@ -186,12 +186,14 @@ oocytesizearea3<-clusterer3(oocytesizearea)
 
 bodysizelength<-bodysize[,1:4]
 names(bodysizelength)<-c("Species","Strain","Sex","area")
+bodysizelength$area<-log(bodysizelength$area)
 bodysizelength1<-bodysizelength %>% group_by(Species,Strain,Sex) %>% 
     summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
 
 
 bodysizearea<-bodysize[,c(1:3,8)]
 names(bodysizearea)<-c("Species","Strain","Sex","area")
+bodysizearea$area<-log(bodysizearea$area)
 bodysizearea1<-bodysizearea %>% group_by(Species,Strain,Sex) %>% 
     summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
 
@@ -256,7 +258,10 @@ plotpic2(bodysizearea1[bodysizearea1$Sex=="male",],bodysizearea1[bodysizearea1$S
 plotpic2(bodysizearea1[bodysizearea1$Sex!="male",],oocytesize1,tr,"Body area female vs oocytesize","females","oocytes")
 plotpic2(bodysizearea1[bodysizearea1$Sex=="male",],spermsize1,tr,"Body area male vs spermsize","males","sperms")
 plotpic2(bodysizearea1[bodysizearea1$Sex=="male",],primaryspermatocyte1,tr,"Body area male vs spermatocytesize","males","spermatocytes")
-
+plotpic2(bodysizelength1[bodysizearea1$Sex=="male",],bodysizelength1[bodysizearea1$Sex!="male",],tr,"Body length male vs female","males","females")
+plotpic2(bodysizelength1[bodysizearea1$Sex!="male",],oocytesize1,tr,"Body length female vs oocytesize","females","oocytes")
+plotpic2(bodysizelength1[bodysizearea1$Sex=="male",],spermsize1,tr,"Body length male vs spermsize","males","sperms")
+plotpic2(bodysizelength1[bodysizearea1$Sex=="male",],primaryspermatocyte1,tr,"Body length male vs spermatocytesize","males","spermatocytes")
 ```
 
 ###PGLS - testing for correlation with evolutionary models
