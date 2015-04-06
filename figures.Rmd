@@ -50,6 +50,7 @@ oocytesize<-read.table("oocyteSizeCaeno.csv",header=T,sep=",")
 primaryspermatocyte<-read.table("PrimarySpermatocyteSize.csv",header=T,sep=",")
 bodysize<-read.csv("CaenoBodySize.csv")
 #ugh, bodysize has a row with pasted in headers at line 1507 - removed it in my version of the file
+#ugh, anagaria has "PS1010" and "PS1010 " replaced in my file
 oocytesize<-oocytesize[oocytesize$oocyte.stage==-1,]
 primaryspermatocyte<-primaryspermatocyte[primaryspermatocyte$Sex=="male",]
 oocytesizearea<-read.csv("oocyteSizearea.csv")
@@ -183,7 +184,21 @@ oocytesizearea1<-clusterer(oocytesizearea)
 oocytesizearea2<-clusterer2(oocytesizearea)
 oocytesizearea3<-clusterer3(oocytesizearea)
 
+bodysizelength<-bodysize[,1:4]
+names(bodysizelength)<-c("Species","Strain","Sex","area")
+bodysizelength1<-bodysizelength %>% group_by(Species,Strain,Sex) %>% 
+    summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
+
+
+bodysizearea<-bodysize[,c(1:3,8)]
+names(bodysizearea)<-c("Species","Strain","Sex","area")
+bodysizearea1<-bodysizearea %>% group_by(Species,Strain,Sex) %>% 
+    summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
+
+
+
 plotpic<-function(df,tree,title,xlab,ylab){
+  rownames(df)<-df$Species
   tree<-drop.tip(tree,tree$tip.label[!(tree$tip.label %in% df$Species)])
   df <- df[match(tree$tip.label,rownames(df)),]
   x1 <- pic(df$means, tree)
@@ -207,6 +222,10 @@ plotpic(spermsize1,tr,"PIC of spermsize means vs CV","spermsize","CV")
 plotpic(oocytesize1,tr,"PIC of oocytesize means vs CV","oocytesize","CV")
 plotpic(primaryspermatocyte1,tr,"PIC of spermatocytesize means vs CV","spermatocytesize","CV")
 plotpic(oocytesizearea1,tr,"PIC of oocytesizearea means vs CV","oocytesize","CV")
+plotpic(bodysizearea1[bodysizearea1$Sex=="male",],tr,"PIC cv bodyvolume male","bodyvolume","CV")
+plotpic(bodysizearea1[bodysizearea1$Sex=="female",],tr,"PIC cv bodyvolume female","bodyvolume","CV")
+plotpic(bodysizelength1[bodysizearea1$Sex=="male",],tr,"PIC cv bodylength male","bodylength","CV")
+plotpic(bodysizelength1[bodysizearea1$Sex=="female",],tr,"PIC cv bodylength female","bodylength","CV")
 ```
 
 ###PIC plots - traits vs traits
