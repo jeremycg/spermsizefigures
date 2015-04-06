@@ -48,6 +48,8 @@ setwd("C:/Users/jeremy/Desktop/geiger")
 spermsizes<-read.table("compileddata.csv",header=T,sep=",")
 oocytesize<-read.table("oocyteSizeCaeno.csv",header=T,sep=",")
 primaryspermatocyte<-read.table("PrimarySpermatocyteSize.csv",header=T,sep=",")
+bodysize<-read.csv("CaenoBodySize.csv")
+#ugh, bodysize has a row with pasted in headers at line 1507 - removed it in my version of the file
 oocytesize<-oocytesize[oocytesize$oocyte.stage==-1,]
 primaryspermatocyte<-primaryspermatocyte[primaryspermatocyte$Sex=="male",]
 oocytesizearea<-read.csv("oocyteSizearea.csv")
@@ -56,49 +58,75 @@ oocytesizearea<-oocytesizearea[oocytesizearea$oocyte.stage==-1,]
 weneednewnames <- list("brenneri"="C. brenneri",
                        "C. brenneri"="C. brenneri",
                        "C. angaria"="C. angaria",
+                       "angaria"="C. angaria",
+                       "angaria "="C. angaria",
                        "C. briggsae"="C. briggsae",
+                       "briggsae"="C. briggsae",
                        "C. drosophilae"="C. drosophilae",
+                       "drosophilae"="C. drosophilae",
                        "C. elegans"="C. elegans",
+                       "elegans"="C. elegans",
                        "C. japonica"="C. japonica",
+                       "japonica"="C. japonica",
                        "C. plicata"="C. plicata",
+                       "plicata"="C. plicata",
                        "C. remanei"="C. remanei",
+                       "remanei"="C. remanei",
                        "C. sp1"="C. sp. 1",
                        "C. sp 1"="C. sp. 1",
+                       "sp1"="C. sp. 1",
                        "C. sp8"="C. sp. 8",
                        "C. sp 8"="C. sp. 8",
+                       "sp8"="C. sp. 8",
                        "C. sp10"="C. doughertyi",
                        "C. sp. 10"="C. doughertyi",
+                       "sp10"="C. doughertyi",
                        "C. sp.11"="C. tropicalis",
                        "C. sp11"="C. tropicalis",
                        "C. sp. 11"="C. tropicalis",
+                       "sp11"="C. tropicalis",
                        "C. sp12"="C. castelli",
                        "C. sp. 12"="C. castelli",
+                       "sp12"="C. castelli",
                        "C. sp13"="C. virilis",
                        "C. sp. 13"="C. virilis",
+                       "sp13"="C. virilis",
                        "C. sp14"="C. imperialis",
                        "C. sp. 14"="C. imperialis",
+                       "sp14"="C. imperialis",
                        "C. sp15"="C. kamaaina",
                        "C. sp. 15"="C. kamaaina",
+                       "sp15"="C. kamaaina",
                        "C. sp16"="C. wallacei",
                        "C. sp. 16"="C. wallacei",
+                       "sp16"="C. wallacei",
                        "C. sp17"="C. nouraguensis",
                        "C. sp. 17"="C. nouraguensis",
+                       "sp17"="C. nouraguensis",
                        "C. sp 18"="C. macrosperma",
                        "C. sp18"="C. macrosperma",
                        "C. sp. 18"="C. macrosperma",
+                       "sp18"="C. macrosperma",
                        "C. sp19"="C. yunquensis",
                        "C. sp. 19"="C. yunquensis",
+                       "sp19"="C. yunquensis",
                        "C. sp2"="C. sp. 2",
                        "C. sp. 2"="C. sp. 2",
+                       "sp2"="C. sp. 2",
                        "C. sp. 20"="C. guadeloupensis",
+                       "sp20"="C. guadeloupensis",
                        "C. sp5"="C. sp. 5",
                        "C. sp. 5"="C. sp. 5",
+                       "sp5"="C. sp. 5",
                        "C. sp6"="C. portoensis",
                        "C. sp. 6"="C. portoensis",
+                       "sp6"="C. portoensis",
                        "C. sp7"="C. afra",
                        "C. sp. 7"="C. afra",
+                       "sp7"="C. afra",
                        "C. sp9"="C. nigoni",
-                       "C. sp. 9"="C. nigoni")
+                       "C. sp. 9"="C. nigoni",
+                       "sp9"="C. nigoni")
 
 renameworms<-function(df){
   df$Species1<-as.character(df$Species)
@@ -107,6 +135,7 @@ renameworms<-function(df){
   df
 }
 
+bodysize<-renameworms(bodysize)
 spermsizes<-renameworms(spermsizes)
 oocytesize<-renameworms(oocytesize)
 primaryspermatocyte<-renameworms(primaryspermatocyte)
