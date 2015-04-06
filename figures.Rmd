@@ -252,6 +252,11 @@ plotpic2(primaryspermatocyte1,oocytesize1,tr,"PIC of spermatocytesize vs oocytes
 plotpic2(spermsize1,oocytesizearea1,tr,"PIC of spermsize vs oocytearea","spermsize","oocytearea")
 plotpic2(primaryspermatocyte1,oocytesizearea1,tr,"PIC of spermatocytesize vs oocytearea","spermatocyte","oocytearea")
 plotpic2(oocytesizearea1,oocytesize1,tr,"PIC of oocytesize vs oocytearea","oocytesize","oocytearea")
+plotpic2(bodysizearea1[bodysizearea1$Sex=="male",],bodysizearea1[bodysizearea1$Sex!="male",],tr,"Body area male vs female","males","females")
+plotpic2(bodysizearea1[bodysizearea1$Sex!="male",],oocytesize1,tr,"Body area female vs oocytesize","females","oocytes")
+plotpic2(bodysizearea1[bodysizearea1$Sex=="male",],spermsize1,tr,"Body area male vs spermsize","males","sperms")
+plotpic2(bodysizearea1[bodysizearea1$Sex=="male",],primaryspermatocyte1,tr,"Body area male vs spermatocytesize","males","spermatocytes")
+
 ```
 
 ###PGLS - testing for correlation with evolutionary models
