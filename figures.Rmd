@@ -567,10 +567,13 @@ AncSperm=x$ace
 spermsize1$Species <- factor(spermsize1$Species, levels = c("C. sp. 1","C. plicata","C. guadeloupensis","C. portoensis","C. virilis","C. sp. 8","C. angaria","C. castelli","C. drosophilae","C. sp. 2","C. kamaaina","C. japonica","C. imperialis","C. afra","C. yunquensis","C. nouraguensis","C. macrosperma","C. elegans","C. brenneri","C. doughertyi","C. wallacei","C. tropicalis","C. remanei","C. sp. 5","C. briggsae","C. nigoni"))
 spermsize=spermsize1[order(spermsize1$Species),]$means
 names(spermsize)<-spermsize1[order(spermsize1$Species),]$Species
-ggtree(tr)+geom_text(aes(label=label),hjust=-0.19,fontface="italic")+geom_point(subset=.(!isTip), 
-           color="#1b9e77", size=sqrt(AncSperm/pi))+
-           geom_point(subset=.(isTip),color="#7570b3", size=sqrt(spermsize/pi))+
-           geom_text(subset=.(isTip),aes(label=round(spermsize,1)), hjust=1, vjust=-0.4, size=3)+
-           geom_text(subset=.(!isTip),aes(label=round(AncSperm,1)), hjust=1.5, vjust=-0.4, size=3)+
-           scale_x_continuous(expand = c(0.1, 0.1))
+plotfancytree<-function(tree,nodesizes,terminalsizes){
+  ggtree(tree)+geom_text(subset=.(isTip),aes(label=label),hjust=-0.19,fontface="italic")+
+    geom_point(subset=.(!isTip),color="#1b9e77", size=sqrt(nodesizes/pi))+
+    geom_point(subset=.(isTip),color="#7570b3", size=sqrt(terminalsizes/pi))+
+    geom_text(subset=.(isTip),aes(label=round(spermsize,1)), hjust=1, vjust=-0.4, size=3)+
+    geom_text(subset=.(!isTip),aes(label=round(AncSperm,1)), hjust=1.5, vjust=-0.4, size=3)+
+    scale_x_continuous(expand = c(0.1, 0.1))
+}
+plotfancytree(tr,AncSperm,spermsize)
 ```
