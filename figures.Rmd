@@ -50,6 +50,11 @@ spermsizes<-read.table("compileddata.csv",header=T,sep=",")
 oocytesize<-read.table("oocyteSizeCaeno.csv",header=T,sep=",")
 primaryspermatocyte<-read.table("PrimarySpermatocyteSize.csv",header=T,sep=",")
 bodysize<-read.csv("CaenoBodySize.csv")
+eggsize<-read.csv("EmbryoSizeCaenoMarie_withSpp.csv")
+#treat as ellipses
+eggsize$area<-eggsize$Length.Mean*eggsize$Width.Mean*pi
+#remove ones we don't have phylogenetic data for
+eggsize<-eggsize[!eggsize$Species %in% c("latens","Ocheius tipulae","sinica"),]
 #ugh, bodysize has a row with pasted in headers at line 1507 - removed it in my version of the file
 #ugh, anagaria has "PS1010" and "PS1010 " replaced in my file
 oocytesize<-oocytesize[oocytesize$oocyte.stage==-1,]
@@ -83,51 +88,65 @@ weneednewnames <- list("brenneri"="C. brenneri",
                        "C. sp10"="C. doughertyi",
                        "C. sp. 10"="C. doughertyi",
                        "sp10"="C. doughertyi",
+                       "doughertyi"="C. doughertyi",
                        "C. sp.11"="C. tropicalis",
                        "C. sp11"="C. tropicalis",
                        "C. sp. 11"="C. tropicalis",
                        "sp11"="C. tropicalis",
+                       "tropicalis"="C. tropicalis",
                        "C. sp12"="C. castelli",
                        "C. sp. 12"="C. castelli",
                        "sp12"="C. castelli",
+                       "castelli"="C. castelli",
                        "C. sp13"="C. virilis",
                        "C. sp. 13"="C. virilis",
                        "sp13"="C. virilis",
+                       "virilis"="C. virilis",
                        "C. sp14"="C. imperialis",
                        "C. sp. 14"="C. imperialis",
                        "sp14"="C. imperialis",
+                       "imperialis"="C. imperialis",
                        "C. sp15"="C. kamaaina",
                        "C. sp. 15"="C. kamaaina",
                        "sp15"="C. kamaaina",
+                       "kamaaina"="C. kamaaina",
                        "C. sp16"="C. wallacei",
                        "C. sp. 16"="C. wallacei",
                        "sp16"="C. wallacei",
+                       "wallacei"="C. wallacei",
                        "C. sp17"="C. nouraguensis",
                        "C. sp. 17"="C. nouraguensis",
                        "sp17"="C. nouraguensis",
+                       "nouraguensis"="C. nouraguensis",
                        "C. sp 18"="C. macrosperma",
                        "C. sp18"="C. macrosperma",
                        "C. sp. 18"="C. macrosperma",
                        "sp18"="C. macrosperma",
+                       "macrosperma"="C. macrosperma",
                        "C. sp19"="C. yunquensis",
                        "C. sp. 19"="C. yunquensis",
                        "sp19"="C. yunquensis",
+                       "yunquensis"="C. yunquensis",
                        "C. sp2"="C. sp. 2",
                        "C. sp. 2"="C. sp. 2",
                        "sp2"="C. sp. 2",
                        "C. sp. 20"="C. guadeloupensis",
                        "sp20"="C. guadeloupensis",
+                       "guadeloupensis"="C. guadeloupensis",
                        "C. sp5"="C. sp. 5",
                        "C. sp. 5"="C. sp. 5",
                        "sp5"="C. sp. 5",
                        "C. sp6"="C. portoensis",
                        "C. sp. 6"="C. portoensis",
                        "sp6"="C. portoensis",
+                       "portoensis"="C. portoensis",
                        "C. sp7"="C. afra",
                        "C. sp. 7"="C. afra",
                        "sp7"="C. afra",
+                       "afra"="C. afra",
                        "C. sp9"="C. nigoni",
                        "C. sp. 9"="C. nigoni",
+                       "nigoni"="C. nigoni",
                        "sp9"="C. nigoni")
 
 renameworms<-function(df){
@@ -198,7 +217,11 @@ bodysizearea$area<-log(bodysizearea$area)
 bodysizearea1<-bodysizearea %>% group_by(Species,Strain,Sex) %>% 
     summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
 
-
+eggsize<-eggsize[,c(1,2,7)]
+eggsize$area<-log(eggsize$area)
+#we have only means - assume equal repeats
+eggsize1<-eggsize %>% group_by(Species) %>% 
+    summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
 
 plotpic<-function(df,tree,title,xlab,ylab){
   rownames(df)<-df$Species
