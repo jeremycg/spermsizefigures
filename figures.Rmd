@@ -161,6 +161,7 @@ spermsizes<-renameworms(spermsizes)
 oocytesize<-renameworms(oocytesize)
 primaryspermatocyte<-renameworms(primaryspermatocyte)
 oocytesizearea<-renameworms(oocytesizearea)
+eggsize<-renameworms(eggsize)
 
 clusterer<-function(df){
   x<-df %>% group_by(Species) %>% 
@@ -282,10 +283,14 @@ plotpic2(bodysizearea1[bodysizearea1$Sex=="male",],bodysizearea1[bodysizearea1$S
 plotpic2(bodysizearea1[bodysizearea1$Sex!="male",],oocytesize1,tr,"Body area female vs oocytesize","females","oocytes")
 plotpic2(bodysizearea1[bodysizearea1$Sex=="male",],spermsize1,tr,"Body area male vs spermsize","males","sperms")
 plotpic2(bodysizearea1[bodysizearea1$Sex=="male",],primaryspermatocyte1,tr,"Body area male vs spermatocytesize","males","spermatocytes")
-plotpic2(bodysizelength1[bodysizearea1$Sex=="male",],bodysizelength1[bodysizearea1$Sex!="male",],tr,"Body length male vs female","males","females")
-plotpic2(bodysizelength1[bodysizearea1$Sex!="male",],oocytesize1,tr,"Body length female vs oocytesize","females","oocytes")
-plotpic2(bodysizelength1[bodysizearea1$Sex=="male",],spermsize1,tr,"Body length male vs spermsize","males","sperms")
-plotpic2(bodysizelength1[bodysizearea1$Sex=="male",],primaryspermatocyte1,tr,"Body length male vs spermatocytesize","males","spermatocytes")
+plotpic2(bodysizelength1[bodysizelength1$Sex=="male",],bodysizelength1[bodysizelength1$Sex!="male",],tr,"Body length male vs female","males","females")
+plotpic2(bodysizelength1[bodysizelength1$Sex!="male",],oocytesize1,tr,"Body length female vs oocytesize","females","oocytes")
+plotpic2(bodysizelength1[bodysizelength1$Sex=="male",],spermsize1,tr,"Body length male vs spermsize","males","sperms")
+plotpic2(bodysizelength1[bodysizelength1$Sex=="male",],primaryspermatocyte1,tr,"Body length male vs spermatocytesize","males","spermatocytes")
+plotpic2(eggsize1,bodysizelength1[bodysizelength1$Sex!="male",],tr,"eggsize vs female length","egg size","length")
+plotpic2(eggsize1,bodysizearea1[bodysizearea1$Sex!="male",],tr,"eggsize vs female volume","egg size","volume")
+plotpic2(eggsize1,spermsize1,tr,"eggsize vs sperm size","egg size","sperm size")
+plotpic2(eggsize1,oocytesize1,tr,"eggsize vs oocyte size","egg size","oocyte size")
 ```
 
 ###PGLS - testing for correlation with evolutionary models
