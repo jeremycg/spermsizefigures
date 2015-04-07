@@ -596,12 +596,15 @@ spermsize1$Species <- factor(spermsize1$Species, levels = c("C. sp. 1","C. plica
 spermsize=spermsize1[order(spermsize1$Species),]$means
 names(spermsize)<-spermsize1[order(spermsize1$Species),]$Species
 plotfancytree<-function(tree,nodesizes,terminalsizes){
-  ggtree(tree)+geom_text(subset=.(isTip),aes(label=label),hjust=-0.19,fontface="italic")+
+  nodesizes<<-nodesizes
+  terminalsizes<<-terminalsizes
+  print(ggtree(tree)+geom_text(subset=.(isTip),aes(label=label),hjust=-0.19,fontface="italic")+
     geom_point(subset=.(!isTip),color="#1b9e77", size=sqrt(nodesizes/pi))+
     geom_point(subset=.(isTip),color="#7570b3", size=sqrt(terminalsizes/pi))+
-    geom_text(subset=.(isTip),aes(label=round(spermsize,1)), hjust=1, vjust=-0.4, size=3)+
-    geom_text(subset=.(!isTip),aes(label=round(AncSperm,1)), hjust=1.5, vjust=-0.4, size=3)+
-    scale_x_continuous(expand = c(0.1, 0.1))
+    geom_text(subset=.(isTip),aes(label=round(terminalsizes,1)), hjust=1, vjust=-0.4, size=3)+
+    geom_text(subset=.(!isTip),aes(label=round(nodesizes,1)), hjust=1.5, vjust=-0.4, size=3)+
+    scale_x_continuous(expand = c(0.1, 0.1)))
+  rm(list=c("terminalsizes","nodesizes"),pos=".GlobalEnv")
 }
 plotfancytree(tr,AncSperm,spermsize)
 ```
