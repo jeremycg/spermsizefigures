@@ -23,6 +23,7 @@ library(picante)
 library(adephylo)
 library(caper)
 library(ggtree)
+library(psych)
 ```
 
 Here's the tree from Kiontke et al 2011, figure 3
@@ -218,6 +219,14 @@ bodysizearea$area<-log(bodysizearea$area)
 bodysizearea1<-bodysizearea %>% group_by(Species,Strain,Sex) %>% 
     summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
 
+
+bodysizewidth<-bodysize[,c(1:3,7)]
+names(bodysizewidth)<-c("Species","Strain","Sex","area")
+bodysizewidth$area<-log(bodysizewidth$area)
+bodysizewidth1<-bodysizewidth %>% group_by(Species,Strain,Sex) %>% 
+  summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
+
+
 eggsize<-eggsize[,c(1,2,7)]
 eggsize$area<-log(eggsize$area)
 #we have only means - assume equal repeats
@@ -253,6 +262,31 @@ plotpic(bodysizearea1[bodysizearea1$Sex=="male",],tr,"PIC cv bodyvolume male","b
 plotpic(bodysizearea1[bodysizearea1$Sex=="female",],tr,"PIC cv bodyvolume female","bodyvolume","CV")
 plotpic(bodysizelength1[bodysizearea1$Sex=="male",],tr,"PIC cv bodylength male","bodylength","CV")
 plotpic(bodysizelength1[bodysizearea1$Sex=="female",],tr,"PIC cv bodylength female","bodylength","CV")
+```
+
+###table of all pairwise PIC correlations and p-values
+
+tables with all pairwise PIC correlations. For the p-value table, those above diagonal are holm corrected 
+
+```{r, echo=FALSE}
+totaldata<-as.data.frame(pic(spermsize1$means,tr))
+names(totaldata)<-c("spermsize")
+
+totaldata$oocytesizearea<-pic(oocytesizearea1$means,tr)
+totaldata$oocytesize<-pic(oocytesize1$means,tr)
+totaldata$malebodyarea<-pic(bodysizearea1[bodysizearea1$Sex=="male",]$means,tr)
+totaldata$femalebodyarea<-pic(bodysizearea1[bodysizearea1$Sex=="female",]$means,tr)
+totaldata$malebodylength<-pic(bodysizelength1[bodysizelength1$Sex=="male",]$means,tr)
+totaldata$femalebodylength<-pic(bodysizelength1[bodysizelength1$Sex=="female",]$means,tr)
+totaldata$malebodywidth<-pic(bodysizewidth1[bodysizewidth1$Sex=="male",]$means,tr)
+totaldata$femalebodywidth<-pic(bodysizewidth1[bodysizewidth1$Sex=="female",]$means,tr)
+
+data2<-merge(totaldata,pic(eggsize1$means,drop.tip(tr,tr$tip.label[!(tr$tip.label %in% eggsize1$Species)])),by=0,all.x=T)
+data3<-merge(totaldata,pic(primaryspermatocyte1$means,drop.tip(tr,tr$tip.label[!(tr$tip.label %in% primaryspermatocyte1$Species)])),by=0,all.x=T)
+
+totaldata$eggsize<-data2$y
+totaldata$primaryspermatocyte<-data3$y
+corr.test(totaldata)
 ```
 
 ###PIC plots - traits vs traits
