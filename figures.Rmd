@@ -269,20 +269,21 @@ plotpic(bodysizelength1[bodysizearea1$Sex=="female",],tr,"PIC cv bodylength fema
 tables with all pairwise PIC correlations. For the p-value table, those above diagonal are holm corrected 
 
 ```{r, echo=FALSE}
-totaldata<-as.data.frame(pic(spermsize1$means,tr))
+tr1<-surface::nameNodes(tr)
+totaldata<-as.data.frame(pic(spermsize1$means,tr1))
 names(totaldata)<-c("spermsize")
 
-totaldata$oocytesizearea<-pic(oocytesizearea1$means,tr)
-totaldata$oocytesize<-pic(oocytesize1$means,tr)
-totaldata$malebodyarea<-pic(bodysizearea1[bodysizearea1$Sex=="male",]$means,tr)
-totaldata$femalebodyarea<-pic(bodysizearea1[bodysizearea1$Sex=="female",]$means,tr)
-totaldata$malebodylength<-pic(bodysizelength1[bodysizelength1$Sex=="male",]$means,tr)
-totaldata$femalebodylength<-pic(bodysizelength1[bodysizelength1$Sex=="female",]$means,tr)
-totaldata$malebodywidth<-pic(bodysizewidth1[bodysizewidth1$Sex=="male",]$means,tr)
-totaldata$femalebodywidth<-pic(bodysizewidth1[bodysizewidth1$Sex=="female",]$means,tr)
+totaldata$oocytesizearea<-pic(oocytesizearea1$means,tr1)
+totaldata$oocytesize<-pic(oocytesize1$means,tr1)
+totaldata$malebodyarea<-pic(bodysizearea1[bodysizearea1$Sex=="male",]$means,tr1)
+totaldata$femalebodyarea<-pic(bodysizearea1[bodysizearea1$Sex=="female",]$means,tr1)
+totaldata$malebodylength<-pic(bodysizelength1[bodysizelength1$Sex=="male",]$means,tr1)
+totaldata$femalebodylength<-pic(bodysizelength1[bodysizelength1$Sex=="female",]$means,tr1)
+totaldata$malebodywidth<-pic(bodysizewidth1[bodysizewidth1$Sex=="male",]$means,tr1)
+totaldata$femalebodywidth<-pic(bodysizewidth1[bodysizewidth1$Sex=="female",]$means,tr1)
 
-data2<-merge(totaldata,pic(eggsize1$means,drop.tip(tr,tr$tip.label[!(tr$tip.label %in% eggsize1$Species)])),by=0,all.x=T)
-data3<-merge(totaldata,pic(primaryspermatocyte1$means,drop.tip(tr,tr$tip.label[!(tr$tip.label %in% primaryspermatocyte1$Species)])),by=0,all.x=T)
+data2<-merge(totaldata,pic(eggsize1$means,drop.tip(tr1,tr1$tip.label[!(tr1$tip.label %in% eggsize1$Species)])),by=0,all.x=T)
+data3<-merge(totaldata,pic(primaryspermatocyte1$means,drop.tip(tr1,tr1$tip.label[!(tr1$tip.label %in% primaryspermatocyte1$Species)])),by=0,all.x=T)
 
 totaldata$eggsize<-data2$y
 totaldata$primaryspermatocyte<-data3$y
