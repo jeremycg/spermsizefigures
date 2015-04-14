@@ -282,6 +282,11 @@ totaldata$femalebodylength<-pic(bodysizelength1[bodysizelength1$Sex=="female",]$
 totaldata$malebodywidth<-pic(bodysizewidth1[bodysizewidth1$Sex=="male",]$means,tr1)
 totaldata$femalebodywidth<-pic(bodysizewidth1[bodysizewidth1$Sex=="female",]$means,tr1)
 
+#both of the folliwng are very bad ideas. I am comparing the "same" nodes against each other
+#but they are only joinging the same taxa, not the same depth or anything
+#I need to think a little about what exactly I'm measuring
+#and probably need to drop all taxa from both traits before a comparison
+#so these cannot be done by corr.teste
 data2<-merge(totaldata,pic(eggsize1$means,drop.tip(tr1,tr1$tip.label[!(tr1$tip.label %in% eggsize1$Species)])),by=0,all.x=T)
 data3<-merge(totaldata,pic(primaryspermatocyte1$means,drop.tip(tr1,tr1$tip.label[!(tr1$tip.label %in% primaryspermatocyte1$Species)])),by=0,all.x=T)
 
