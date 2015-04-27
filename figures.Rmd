@@ -165,20 +165,20 @@ oocytesizearea<-renameworms(oocytesizearea)
 eggsize<-renameworms(eggsize)
 
 clusterer<-function(df){
-  x<-df %>% group_by(Species) %>% 
+  x<-df %>% group_by(Species) %>%
     summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
   rownames(x) <- x$Species
   x
 }
 
 clusterer2<-function(df){
-  x<-df %>% group_by(Species,Strain) %>% 
+  x<-df %>% group_by(Species,Strain) %>%
     summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
   x
 }
 
 clusterer3<-function(df){
-  x<-df %>% group_by(Species,Strain,individual) %>% 
+  x<-df %>% group_by(Species,Strain,individual) %>%
     summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
   x
 }
@@ -209,28 +209,28 @@ oocytesizearea3<-clusterer3(oocytesizearea)
 bodysizelength<-bodysize[,1:4]
 names(bodysizelength)<-c("Species","Strain","Sex","area")
 bodysizelength$area<-log(bodysizelength$area)
-bodysizelength1<-bodysizelength %>% group_by(Species,Strain,Sex) %>% 
+bodysizelength1<-bodysizelength %>% group_by(Species,Strain,Sex) %>%
     summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
 
 
 bodysizearea<-bodysize[,c(1:3,8)]
 names(bodysizearea)<-c("Species","Strain","Sex","area")
 bodysizearea$area<-log(bodysizearea$area)
-bodysizearea1<-bodysizearea %>% group_by(Species,Strain,Sex) %>% 
+bodysizearea1<-bodysizearea %>% group_by(Species,Strain,Sex) %>%
     summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
 
 
 bodysizewidth<-bodysize[,c(1:3,7)]
 names(bodysizewidth)<-c("Species","Strain","Sex","area")
 bodysizewidth$area<-log(bodysizewidth$area)
-bodysizewidth1<-bodysizewidth %>% group_by(Species,Strain,Sex) %>% 
+bodysizewidth1<-bodysizewidth %>% group_by(Species,Strain,Sex) %>%
   summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
 
 
 eggsize<-eggsize[,c(1,2,7)]
 eggsize$area<-log(eggsize$area)
 #we have only means - assume equal repeats
-eggsize1<-eggsize %>% group_by(Species) %>% 
+eggsize1<-eggsize %>% group_by(Species) %>%
     summarise(means=mean(area,na.rm=T),cv=sd(area,na.rm=T)/mean(area,na.rm=T))
 
 plotpic<-function(df,tree,title,xlab,ylab){
@@ -266,7 +266,7 @@ plotpic(bodysizelength1[bodysizearea1$Sex=="female",],tr,"PIC cv bodylength fema
 
 ###table of all pairwise PIC correlations and p-values
 
-tables with all pairwise PIC correlations. For the p-value table, those above diagonal are holm corrected 
+tables with all pairwise PIC correlations. For the p-value table, those above diagonal are holm corrected
 
 ```{r, echo=FALSE}
 tr1<-surface::nameNodes(tr)
