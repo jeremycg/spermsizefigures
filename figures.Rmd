@@ -660,7 +660,7 @@ tr<-read.tree(text="(C. sp. 1:0.356,(C. plicata:0.3,((C. guadeloupensis:0.223,((
 
 tr$tip.label<-c("C. sp. 1","C. plicata","C. guadeloupensis","C. portoensis","C. virilis","C. sp. 8","C. angaria","C. castelli","C. drosophilae","C. sp. 2","C. kamaaina","C. japonica","C. imperialis","C. afra","C. yunquensis","C. nouraguensis","C. macrosperma","C. elegans","C. brenneri","C. doughertyi","C. wallacei","C. tropicalis","C. remanei","C. sp. 5","C. briggsae","C. nigoni")
 tr<-nameNodes(tr)
-spermsizes<-read.table("compileddata.csv",header=T,sep=",")
+spermsizes<-read.table("C:/Users/jeremy/Desktop/geiger/compileddata.csv",header=T,sep=",")
 spermsizes<-renameworms(spermsizes)
 clusterer<-function(df){
   x<-df %>% group_by(Species) %>% 
@@ -694,3 +694,4 @@ distributionofvals<-function(n,tr,fit,shifts){
 
 #increase/run this to bootstap - for now it takes ~30 secs per run
 #distributionofvals(2,tr,z$bwd[[2]]$fit,z$bwd[[2]]$savedshifts)
+```
