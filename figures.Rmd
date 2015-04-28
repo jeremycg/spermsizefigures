@@ -692,6 +692,9 @@ distributionofvals<-function(n,tr,fit,shifts){
   rdply(n,getvals(tr,fit,shifts),.progress = "text")
 }
 
+surfaceTreePlot(tr,z$bwd[[2]])
+
+
 #increase/run this to bootstap - for now it takes ~30 secs per run
 #distributionofvals(2,tr,z$bwd[[2]]$fit,z$bwd[[2]]$savedshifts)
 ```
