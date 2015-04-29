@@ -11,6 +11,7 @@ library(adephylo)
 library(caper)
 library(ggtree)
 library(psych)
+library(knitr)
 
 ## ----,echo=FALSE,hide=TRUE,message=FALSE---------------------------------
 #tree
@@ -409,10 +410,10 @@ plotpic2<-function(df1,df2,tree,title,xlab,ylab){
   rp[2]=substitute(expression(italic(p) == MYVALUE), list(MYVALUE = format(p,dig=3)))[2]
   legend("bottomright",bty="n",legend=rp)
 }
-plotpic2(spermsizelog1,oocytesizearealog1,tr,"sperm vs oocyte","sperm","oocyte")
+plotpic2(eggsizelog1,spermsizelog1,tr,"Sperm vs Eggsize","oocyte","sperm")
 
 ## ----,echo=FALSE---------------------------------------------------------
-plotpic2(oocytesizearealog1,bodysizearealog1[bodysizearealog1$Sex=="female",],tr,"oocyte vs body volume","oocyte size","body volume")
+plotpic2(bodysizelengthlog1[bodysizelengthlog1$Sex=="female",],eggsizelog1,tr,"oocyte vs body length","body length","oocyte size")
 
 ## ----,echo=FALSE---------------------------------------------------------
 ztemp<-merge(eggvolume1,spermvolume1,by="Species")
@@ -624,5 +625,37 @@ distributionofvals<-function(n,tr,fit,shifts){
 
 surfaceTreePlot(tr,z$bwd[[2]])
 surfaceAICPlot(fwd=z$fwd,bwd=z$bwd)
+
+
+## ----,echo=FALSE---------------------------------------------------------
+plotpic2(oocytesizearealog1,spermsizelog1,tr,"Sperm vs Eggsize","oocyte","sperm")
+
+## ----,echo=FALSE---------------------------------------------------------
+plotpic2(bodysizelengthlog1[bodysizelengthlog1$Sex=="female",],oocytesizearealog1,tr,"oocyte vs body volume","body length","oocyte size")
+
+## ----,echo=FALSE---------------------------------------------------------
+plotpictable<-function(df,tree){
+  tree<-drop.tip(tree,tree$tip.label[!(tree$tip.label %in% df$Species)])
+  rownames(df)<-df$Species
+  df <- df[match(tree$tip.label,rownames(df)),]
+  rownames(df)<-df$Species
+  x1 <- pic(df$means, tree)
+  y1 <- pic(df$cv, tree)
+  summary(gls(means ~ cv, data=df,correlation=corBrownian(1,tree)))$tTable
+}
+kable(plotpictable(spermsizelog1,tr),digits=3,caption="PGLS,all")
+spermsizelog1noherm<-spermsizelog1[spermsizelog1$Species=="C. elegans"|spermsizelog1$Species=="C. briggsae"|spermsizelog1$Species=="C. tropicalis",]
+kable(plotpictable(spermsizelog1noherm,tr),digits=3,caption="PGLS, no herm")
+plotnopictable<-function(df,tree){
+  tree<-drop.tip(tree,tree$tip.label[!(tree$tip.label %in% df$Species)])
+  rownames(df)<-df$Species
+  df <- df[match(tree$tip.label,rownames(df)),]
+  rownames(df)<-df$Species
+  x1 <- pic(df$means, tree)
+  y1 <- pic(df$cv, tree)
+  summary(gls(means ~ cv, data=df))$tTable
+}
+kable(plotnopictable(spermsizelog1,tr),digits=3,caption="GLS,all")
+kable(plotnopictable(spermsizelog1noherm,tr),digits=3,caption="GLS, no herm")
 
 
