@@ -380,10 +380,11 @@ print(c("p-value from pgls of sperm to male body size (width):",pglsdata(spermsi
 print(c("p-value from pgls of sperm to egg size (from Farhadifar):",pglsdata(spermsizelog1,eggsizelog1,tr)))
 print(c("p-value from pgls of sperm to oocyte size:",pglsdata(spermsizelog1,oocytesizearealog1,tr)))
 #volumetric ratios
-ztemp<-merge(spermsize1,eggsize1,by="Species")
+ztemp<-merge(spermvolume1,eggvolume1,by="Species")
 ztemp$ratio<-ztemp$means.x/ztemp$means.y
-print(c("sperm:egg ratio: Farhadifar elegans",1/ztemp$ratio[ztemp$Species=="C. elegans"]))
-print(c("sperm:egg ratio: Farhadifar drosophilae",1/ztemp$ratio[ztemp$Species=="C. drosophilae"]))
+print(c("sperm volume:egg volume ratio: Farhadifar elegans",1/ztemp$ratio[ztemp$Species=="C. elegans"]))
+print(c("sperm volume:egg volume ratio: Farhadifar drosophilae",1/ztemp$ratio[ztemp$Species=="C. drosophilae"]))
+print('these are the max and min')
 ztemp<-merge(spermsize1,oocytesizearea1,by="Species")
 ztemp$ratio<-ztemp$means.x/ztemp$means.y
 print(c("sperm:oocyte ratio: elegans",1/ztemp$ratio[ztemp$Species=="C. elegans"]))
@@ -410,17 +411,17 @@ plotpic2<-function(df1,df2,tree,title,xlab,ylab){
   rp[2]=substitute(expression(italic(p) == MYVALUE), list(MYVALUE = format(p,dig=3)))[2]
   legend("bottomright",bty="n",legend=rp)
 }
-plotpic2(eggsizelog1,spermsizelog1,tr,"Sperm vs Eggsize","oocyte","sperm")
+plotpic2(eggsizelog1,spermsizelog1,tr,"Sperm vs Eggsize","eggsize","sperm")
 
 ## ----,echo=FALSE---------------------------------------------------------
 plotpic2(bodysizelengthlog1[bodysizelengthlog1$Sex=="female",],eggsizelog1,tr,"oocyte vs body length","body length","oocyte size")
 
 ## ----,echo=FALSE---------------------------------------------------------
 ztemp<-merge(eggvolume1,spermvolume1,by="Species")
-ztemp$ratio<-ztemp$means.y/ztemp$means.x
+ztemp$ratio<-ztemp$means.x/ztemp$means.y
 ggplot(ztemp,aes(reorder(Species, -ratio), ratio))+geom_bar(stat="identity")+theme(axis.text.x = element_text(angle = 90, hjust = 1))+
-  scale_y_continuous(limits = c(0, 0.05),breaks=seq(from=0,to=0.05,by=0.001),labels = c(0,rep("",4), 0.005, rep("",4), 0.010,rep("",4),0.015,rep("",4),0.020,rep("",4),0.0025,rep("",4),0.030,rep("",4),0.035,rep("",4),0.040,rep("",4),0.045,rep("",4),0.050),expand = c(0, 0))+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
-    panel.background = element_blank(), axis.line = element_line(colour = "black"))+xlab("Species")+ylab("Ratio of Sperm volume to Egg volume")
+  scale_y_continuous(limits = c(0, 450),breaks=seq(from=0,to=500,by=10),labels = c(0,rep("",4), 50, rep("",4), 100,rep("",4),150,rep("",4),200,rep("",4),250,rep("",4),300,rep("",4),350,rep("",4),400,rep("",4),450,rep("",4),600),expand = c(0, 0))+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+    panel.background = element_blank(), axis.line = element_line(colour = "black"))+xlab("Species")+ylab("Ratio of Egg volume to Sperm volume")
 
 ## ----,echo=FALSE---------------------------------------------------------
 plotpic<-function(df,tree,title,xlab,ylab){
@@ -452,8 +453,9 @@ plotpic2(spermsizelog1,primaryspermatocytelog1,tr,"sperm vs primary spermatocyte
 ## ----,echo=FALSE---------------------------------------------------------
 violinit<-function(f,specieslist){
   g=f[f$Species%in%specieslist,]
+  g$factorspecies<-factor(g$Species, levels=specieslist)
   p<-ggplot(g,aes(factor(Strain), area))
-  p + facet_wrap(~Species,ncol = 4,scales = "free_x")+geom_violin(aes(fill = Species)) + geom_jitter(position =
+  p + facet_wrap(~factorspecies,ncol = 4,scales = "free_x")+geom_violin(aes(fill = Species)) + geom_jitter(position =
     position_jitter(width = .2),alpha=0.5,)+theme(legend.position = "none") +
     ylab( expression(paste("area (", mu, m^{2},")")))+xlab("Strain")+
     theme(panel.margin = unit(0.05, "lines"))+theme(panel.grid.major = element_blank(),
@@ -462,7 +464,7 @@ violinit<-function(f,specieslist){
                   labels = c(0,rep("",4), 50, rep("",4), 100,rep("",4),150,rep("",4),200,rep("",4),250,"","","")) 
 }
 
-violinit(spermsizes,c("C. brenneri","C. remanei","C. sp. 8","C. macrosperma"))
+violinit(spermsizes,c("C. macrosperma","C. sp. 8","C. remanei","C. brenneri"))
 
 ## ----,echo=FALSE---------------------------------------------------------
 clumper<-function(species,dfindv,dfstrain,dfspecies){
@@ -575,8 +577,8 @@ plotfancytree2<-function(tree,nodesizes,terminalsizes){
   nodesizes<<-nodesizes
   terminalsizes<<-terminalsizes
   print(ggtree(tree)+geom_text(subset=.(isTip),aes(label=label),hjust=-0.19,fontface="italic")+
-    geom_point(subset=.(!isTip),color="#ffae1a", size=sqrt(nodesizes/pi)/10)+
-    geom_point(subset=.(isTip),color="#7570b3", size=sqrt(terminalsizes/pi)/10)+
+    geom_point(subset=.(!isTip),color="#ffae1a", size=sqrt(nodesizes/pi)/5)+
+    geom_point(subset=.(isTip),color="#7570b3", size=sqrt(terminalsizes/pi)/5)+
     geom_text(subset=.(isTip),aes(label=round(terminalsizes,1)), hjust=1, vjust=-0.4, size=3)+
     geom_text(subset=.(!isTip),aes(label=round(nodesizes,1)), hjust=1.5, vjust=-0.4, size=3)+
     scale_x_continuous(expand = c(0.1, 0.1)))
@@ -628,10 +630,10 @@ surfaceAICPlot(fwd=z$fwd,bwd=z$bwd)
 
 
 ## ----,echo=FALSE---------------------------------------------------------
-plotpic2(oocytesizearealog1,spermsizelog1,tr,"Sperm vs Eggsize","oocyte","sperm")
+plotpic2(oocytesizearealog1,spermsizelog1,tr,"Sperm vs Oocyte size","oocyte","sperm")
 
 ## ----,echo=FALSE---------------------------------------------------------
-plotpic2(bodysizelengthlog1[bodysizelengthlog1$Sex=="female",],oocytesizearealog1,tr,"oocyte vs body volume","body length","oocyte size")
+plotpic2(bodysizelengthlog1[bodysizelengthlog1$Sex=="female",],oocytesizearealog1,tr,"oocyte vs body length","body length","oocyte size")
 
 ## ----,echo=FALSE---------------------------------------------------------
 plotpictable<-function(df,tree){
